@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>服务员端 · 餐厅掌柜</title>
+<script src="../vendor/vue.global.prod.js"></script>
+<style>
+:root {
+  --blue:#3B82F6; --blue-d:#2563EB; --blue-deep:#1E40AF;
+  --bg:#EEF2F8; --ink:#1F2329; --sub:#8A94A6; --line:#E8ECF3;
+  --red:#E5484D; --green:#1F9D55; --amber:#B45309; --orange:#E85518;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; }
+[v-cloak] { display:none; }
+button { font-family:inherit; }
+
+/* ===== 登录 ===== */
+.login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+  background:linear-gradient(160deg,#1E3A8A 0%,#2563EB 55%,#60A5FA 100%); }
+.login-card { background:#fff; border-radius:22px; padding:40px 32px 32px; width:100%; max-width:380px; box-shadow:0 24px 70px rgba(15,32,90,.4); }
+.login-card .logo { width:64px; height:64px; margin:0 auto 14px; border-radius:18px; display:flex; align-items:center; justify-content:center;
+  font-size:32px; background:linear-gradient(135deg,#2563EB,#60A5FA); box-shadow:0 8px 20px rgba(37,99,235,.35); }
+.login-card h1 { font-size:22px; text-align:center; }
+.login-card .sub { text-align:center; color:var(--sub); font-size:13px; margin:6px 0 26px; }
+.login-card input { width:100%; border:1.5px solid var(--line); border-radius:12px; padding:13px 16px; font-size:15px; margin-bottom:12px; outline:none; transition:border .15s; }
+.login-card input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(59,130,246,.12); }
+.login-card .hint-acc { font-size:12px; color:#909399; margin:-4px 0 10px; cursor:pointer; text-align:center; text-decoration:underline; text-underline-offset:3px; }
+.login-card .err { color:var(--red); font-size:13px; margin-bottom:8px; min-height:18px; }
+.login-card button { width:100%; border:none; border-radius:12px; background:linear-gradient(90deg,#2563EB,#3B82F6); color:#fff; font-size:16px; font-weight:700; padding:14px; cursor:pointer; box-shadow:0 8px 20px rgba(37,99,235,.3); }
+.login-card button:active { transform:scale(.98); }
+
+/* ===== 布局 ===== */
+.app { max-width:500px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; position:relative; }
+.top { background:linear-gradient(135deg,#1E40AF,#3B82F6); color:#fff; padding:18px 18px 0; position:sticky; top:0; z-index:20;
+  border-radius:0 0 22px 22px; box-shadow:0 8px 24px rgba(30,64,175,.28); }
+.top .row1 { display:flex; justify-content:space-between; align-items:center; }
+.top .brand { display:flex; align-items:center; gap:10px; }
+.top .brand .bl { width:38px; height:38px; border-radius:12px; background:rgba(255,255,255,.18); display:flex; align-items:center; justify-content:center; font-size:20px; }
+.top h2 { font-size:19px; letter-spacing:.5px; }
+.top .brand .tagline { font-size:11px; opacity:.75; }
+.top .staff { font-size:12.5px; background:rgba(255,255,255,.18); border-radius:999px; padding:5px 13px; font-weight:600; }
+.top .tabs { display:flex; margin-top:14px; gap:4px; }
+.top .tab { flex:1; text-align:center; font-size:13.5px; padding:10px 2px; border-radius:12px 12px 0 0; color:rgba(255,255,255,.75);
+  cursor:pointer; position:relative; font-weight:600; transition:background .15s; }
+.top .tab .t-ico { font-size:15px; margin-right:2px; }
+.top .tab.active { background:#fff; color:var(--blue-deep); font-weight:800; }
+.top .tab .badge { position:absolute; top:-8px; right:6px; background:var(--red); color:#fff; font-size:10.5px; border-radius:999px;
+  min-width:18px; height:18px; display:flex; align-items:center; justify-content:center; padding:0 5px; font-weight:800; box-shadow:0 2px 6px rgba(229,72,77,.4); }
+
+.content { flex:1; padding:16px 14px 26px; }
+.empty { text-align:center; color:var(--sub); padding:70px 0 60px; font-size:14px; }
+.empty .e-ico { font-size:44px; display:block; margin-bottom:12px; opacity:.5; }
+
+/* ===== 订单卡片 ===== */
+.ocard { background:#fff; border-radius:16px; padding:16px; margin-bottom:13px; box-shadow:0 3px 14px rgba(31,35,41,.06); border:1px solid #fff; }
+.ocard.urgent { border-color:#FFB4B4; box-shadow:0 3px 14px rgba(229,72,77,.12); }
+.ocard .oh { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.ocard .table-no { font-size:18px; font-weight:800; background:linear-gradient(135deg,#EFF4FF,#E3ECFF); color:var(--blue-d); border-radius:10px; padding:4px 13px; letter-spacing:.5px; }
+.ocard .time { font-size:12px; color:var(--sub); }
+.ocard .time.late { color:var(--red); font-weight:700; }
+.ocard .items { font-size:14.5px; line-height:2; }
+.ocard .items .dish-ico { font-size:15px; margin-right:4px; }
+.ocard .items .opt { color:#8A94A6; font-size:12px; }
+.ocard .items .add-tag { display:inline-block; background:#FFF1E8; color:var(--orange); font-size:10.5px; border-radius:5px; padding:1px 6px; margin-left:5px; font-weight:800; }
+.ocard .remark { font-size:12.5px; color:#8A5A3B; background:#FFF7F0; border-radius:10px; padding:7px 12px; margin:10px 0 0; }
+.ocard .of { display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); }
+.ocard .total { font-size:13px; color:var(--sub); }
+.ocard .total b { font-size:19px; color:var(--blue-d); margin-left:5px; }
+.ocard .btns { display:flex; gap:8px; }
+.btn { border:none; border-radius:10px; padding:9px 16px; font-size:13.5px; font-weight:700; cursor:pointer; transition:transform .08s; }
+.btn:active { transform:scale(.96); }
+.btn.primary { background:linear-gradient(90deg,#2563EB,#3B82F6); color:#fff; box-shadow:0 4px 12px rgba(37,99,235,.28); }
+.btn.ghost { background:#F0F4FA; color:#3A4B63; }
+.btn.danger { background:#FDECEC; color:var(--red); }
+.btn.amber { background:#FFF4E0; color:#B45309; }
+.btn.green { background:#E8F8EF; color:#1F9D55; }
+.btn:disabled { opacity:.5; cursor:default; }
+.btn-lg { width:100%; padding:14px; font-size:15px; border-radius:13px; }
+
+/* 收银台 */
+.settle-head { display:flex; gap:12px; margin-bottom:14px; }
+.settle-stat { flex:1; background:#fff; border-radius:14px; padding:14px; text-align:center; box-shadow:0 3px 12px rgba(31,35,41,.05); }
+.settle-stat .v { font-size:20px; font-weight:800; color:var(--blue-d); }
+.settle-stat .k { font-size:12px; color:var(--sub); margin-top:3px; }
+
+/* ===== 桌台总览 ===== */
+.legend { display:flex; gap:12px; font-size:12px; color:var(--sub); margin:4px 0 12px; flex-wrap:wrap; }
+.legend .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:4px; }
+.wgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.wcard { border-radius:15px; padding:16px 8px; text-align:center; cursor:pointer; border:1px solid var(--line); background:#fff; transition:transform .1s; box-shadow:0 2px 8px rgba(31,35,41,.04); }
+.wcard:active { transform:scale(.95); }
+.wcard .name { font-size:17px; font-weight:800; }
+.wcard .state { font-size:12px; margin-top:5px; font-weight:600; }
+.wcard.free { background:#F2FBF5; border-color:#C9F0DA; } .wcard.free .state { color:#1F9D55; }
+.wcard.conf { background:#FFF4E0; border-color:#FFE2AE; } .wcard.conf .state { color:#B45309; }
+.wcard.dine { background:#EFF4FF; border-color:#C5DAFF; } .wcard.dine .state { color:#2563EB; }
+.wcard.dirty { background:#FDF0F0; border-color:#FFC9C9; } .wcard.dirty .state { color:#E5484D; }
+.wcard.stopped { background:#F4F2EF; border-color:#E5E2DD; } .wcard.stopped .state { color:#9BA3B2; }
+
+/* ===== 弹层 ===== */
+.mask { position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:50; display:flex; align-items:flex-end; justify-content:center; }
+.sheet { background:#fff; width:100%; max-width:500px; border-radius:20px 20px 0 0; max-height:90vh; display:flex; flex-direction:column; animation:up .2s ease; }
+@keyframes up { from { transform:translateY(44px); opacity:.5; } to { transform:none; opacity:1; } }
+.sheet .sh { display:flex; justify-content:space-between; align-items:center; padding:18px 20px 12px; }
+.sheet .sh b { font-size:17px; }
+.sheet .sh .x { font-size:24px; color:var(--sub); cursor:pointer; padding:0 8px; line-height:1; }
+.sheet .sb { padding:0 20px 18px; overflow-y:auto; }
+.srow { display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--line); font-size:14.5px; }
+.srow .opt { color:#8A94A6; font-size:12px; }
+.qty-ctl { display:flex; align-items:center; gap:10px; }
+.qty-ctl button { width:30px; height:30px; border-radius:50%; border:1.5px solid var(--blue); background:#fff; color:var(--blue-d); font-size:16px; font-weight:800; cursor:pointer; }
+.qty-ctl span { min-width:22px; text-align:center; font-weight:800; }
+.field { margin:13px 0; }
+.field label { display:block; font-size:13px; color:#5A6370; margin-bottom:7px; font-weight:600; }
+.field input, .field textarea, .field select { width:100%; border:1.5px solid var(--line); border-radius:11px; padding:11px 13px; font-size:14px; outline:none; font-family:inherit; background:#fff; }
+.field input:focus, .field textarea:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+.pay-opts { display:flex; gap:10px; }
+.pay-opts .po { flex:1; text-align:center; border:1.5px solid var(--line); border-radius:12px; padding:15px 0; cursor:pointer; font-weight:700; font-size:14px; transition:all .12s; }
+.pay-opts .po.sel { border-color:var(--blue); background:#EFF4FF; color:var(--blue-d); box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+.tbl-picker { display:flex; flex-wrap:wrap; gap:8px; }
+.tbl-picker .t { padding:9px 15px; border-radius:10px; border:1.5px solid var(--line); font-size:14px; font-weight:700; cursor:pointer; background:#fff; }
+.tbl-picker .t.sel { border-color:var(--blue); background:#EFF4FF; color:var(--blue-d); }
+.tbl-picker .t.dis { opacity:.4; cursor:default; }
+
+/* 代客下单：菜品选择 */
+.tbl-locked { display:flex; align-items:center; gap:10px; background:linear-gradient(135deg,#EFF4FF,#E7F0FF); border:1px solid #C5DAFF;
+  border-radius:12px; padding:12px 14px; font-size:14px; font-weight:700; color:var(--blue-d); }
+.tbl-locked .lk-ico { font-size:20px; }
+.dish-search input { background:#F4F6FA url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238A94A6' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-4.3-4.3'/%3E%3C/svg%3E") no-repeat 12px center; padding-left:36px !important; }
+.cat-chips { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+.cat-chips .cc { font-size:12px; border:1px solid var(--line); border-radius:999px; padding:5px 12px; cursor:pointer; background:#fff; color:#5A6370; font-weight:600; }
+.cat-chips .cc.sel { border-color:var(--blue); background:#EFF4FF; color:var(--blue-d); }
+.dish-pick { display:grid; grid-template-columns:1fr 1fr; gap:10px; max-height:320px; overflow-y:auto; padding:2px; }
+.dish-pick .dp { border:1.5px solid var(--line); border-radius:13px; padding:11px; cursor:pointer; background:#fff; transition:all .12s; position:relative; }
+.dish-pick .dp:active { transform:scale(.97); }
+.dish-pick .dp.sel { border-color:var(--blue); background:#EFF4FF; box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+.dish-pick .dp .dp-ico { font-size:26px; line-height:1; display:block; }
+.dish-pick .dp .dp-img { width:100%; height:56px; object-fit:cover; border-radius:8px; display:block; background:#F4F6FA; }
+.dish-pick .dp b { font-size:13.5px; display:block; margin-top:6px; }
+.dish-pick .dp .dp-desc { font-size:11px; color:var(--sub); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dish-pick .dp .dp-price { font-size:12.5px; color:var(--orange); font-weight:800; margin-top:4px; display:block; }
+.dish-pick .dp .dp-check { position:absolute; top:8px; right:8px; width:18px; height:18px; border-radius:50%; background:var(--blue); color:#fff; font-size:11px; display:flex; align-items:center; justify-content:center; }
+.picked-box { border:1.5px solid var(--line); border-radius:13px; padding:4px 13px; margin-bottom:13px; }
+.picked-box .pk { display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px dashed var(--line); }
+.picked-box .pk:last-child { border-bottom:none; }
+.picked-box .pk .pk-n { font-size:14px; font-weight:600; }
+.picked-box .pk .pk-n .pk-ico { margin-right:5px; }
+.picked-box .pk .pk-p { font-size:11.5px; color:var(--sub); margin-top:1px; }
+.opt-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+.opt-row .oc { font-size:11.5px; border:1px solid var(--line); border-radius:999px; padding:4px 11px; cursor:pointer; background:#fff; }
+.opt-row .oc.sel { border-color:var(--blue); color:var(--blue-d); background:#EFF4FF; font-weight:700; }
+.sheet-foot { padding:13px 20px calc(15px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); display:flex; gap:10px; background:#fff; }
+.sheet-foot .btn { flex:1; padding:13px; font-size:15px; border-radius:12px; }
+.toast { position:fixed; top:16px; left:50%; transform:translateX(-50%); background:rgba(31,35,41,.92); color:#fff; font-size:13.5px; border-radius:999px; padding:10px 22px; z-index:99; box-shadow:0 8px 24px rgba(0,0,0,.25); }
+</style>
+</head>
+<body>
+<div id="app" v-cloak>
+  <!-- 登录 -->
+  <div class="login-wrap" v-if="!token">
+    <div class="login-card">
+      <div class="logo">🍽️</div>
+      <h1>服务员端</h1>
+      <div class="sub">餐厅掌柜 · 待确认 / 加菜 / 订单信息 / 桌台</div>
+      <input v-model="loginForm.username" placeholder="账号" @keyup.enter="doLogin">
+      <input v-model="loginForm.password" type="password" placeholder="密码" @keyup.enter="doLogin">
+      <div class="hint-acc" @click="fillAccount('waiter')">测试账号：waiter / waiter2 / waiter3 · 密码均为 123456（点此一键填入 waiter）</div>
+      <div class="err">{{ loginErr }}</div>
+      <button @click="doLogin">登 录</button>
+    </div>
+  </div>
+
+  <!-- 主界面 -->
+  <div class="app" v-else>
+    <div class="top">
+      <div class="row1">
+        <div class="brand">
+          <div class="bl">🍽️</div>
+          <div><h2>服务员端</h2><div class="tagline">餐厅掌柜 · 工作台</div></div>
+        </div>
+        <span class="staff">{{ staff.name }} · {{ roleText }}</span>
+      </div>
+      <div class="tabs">
+        <div class="tab" :class="{active: tab==='queue'}" @click="tab='queue'"><span class="t-ico">🔔</span>待确认
+          <span class="badge" v-if="queue.length">{{ queue.length }}</span>
+        </div>
+        <div class="tab" :class="{active: tab==='adds'}" @click="tab='adds'"><span class="t-ico">➕</span>加菜
+          <span class="badge" v-if="adds.length">{{ adds.length }}</span>
+        </div>
+        <div class="tab" :class="{active: tab==='info'}" @click="tab='info'"><span class="t-ico">📋</span>订单信息
+          <span class="badge" v-if="settles.length">{{ settles.length }}</span>
+        </div>
+        <div class="tab" :class="{active: tab==='tables'}" @click="tab='tables'"><span class="t-ico">🪑</span>桌台</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- 待确认 -->
+      <template v-if="tab==='queue'">
+        <div class="empty" v-if="!queue.length"><span class="e-ico">🔔</span>暂无待确认订单<br>新订单将实时提醒</div>
+        <div class="ocard" v-for="o in queue" :key="o.id" :class="{urgent: o.wait_min >= 3}">
+          <div class="oh">
+            <span class="table-no">{{ o.table_name }}</span>
+            <span class="time" :class="{late: o.wait_min >= 3}">下单 {{ o.created_at }}<template v-if="o.wait_min"> · 已等 {{ o.wait_min }} 分钟</template></span>
+          </div>
+          <div class="items">
+            <div v-for="i in o.items" :key="i.id"><span class="dish-ico" v-if="emojiMap[i.dish_id]">{{ emojiMap[i.dish_id] }}</span>{{ i.name }} ×{{ i.qty }}
+              <span class="opt" v-if="optText(i.options)">（{{ optText(i.options) }}）</span>
+            </div>
+          </div>
+          <div class="remark" v-if="o.remark">备注：{{ o.remark }}</div>
+          <div class="of">
+            <span class="total">共 {{ o.items.length }} 种 · <template v-if="o.is_takeout">{{ o.utensils || 0 }} 个打包盒 · 打包盒费¥{{ fee(o).toFixed(2) }}</template><template v-else>{{ o.people || 1 }}人用餐 · 餐具费¥{{ fee(o).toFixed(2) }}</template><b>¥{{ rcv(o).toFixed(2) }}</b></span>
+            <div class="btns">
+              <button class="btn danger" @click="openReject(o)">拒绝</button>
+              <button class="btn ghost" @click="openModify(o)">修改</button>
+              <button class="btn primary" @click="confirmOrder(o)">确认</button>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- 加菜确认 -->
+      <template v-if="tab==='adds'">
+        <div class="empty" v-if="!adds.length"><span class="e-ico">➕</span>暂无待确认的加菜</div>
+        <div class="ocard" v-for="o in adds" :key="'a'+o.id">
+          <div class="oh">
+            <span class="table-no">{{ o.table_name }}</span>
+            <span class="time">单号 {{ o.order_no }}</span>
+          </div>
+          <div class="items">
+            <div v-for="i in o.add_items" :key="i.id"><span class="dish-ico" v-if="emojiMap[i.dish_id]">{{ emojiMap[i.dish_id] }}</span>{{ i.name }} ×{{ i.qty }}
+              <span class="add-tag">加</span>
+              <span class="opt" v-if="optText(i.options)">（{{ optText(i.options) }}）</span>
+            </div>
+          </div>
+          <div class="of">
+            <span class="total">加菜后总额（含餐具费）<b>¥{{ rcv(o).toFixed(2) }}</b></span>
+            <div class="btns">
+              <button class="btn primary" @click="confirmAdd(o)">确认加菜 → 后厨</button>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- 订单信息 -->
+      <template v-if="tab==='info'">
+        <div class="settle-head">
+          <div class="settle-stat"><div class="v">{{ queue.length + settles.length }}</div><div class="k">进行中订单</div></div>
+          <div class="settle-stat"><div class="v">¥{{ settleTotal.toFixed(2) }}</div><div class="k">未结账金额（收银台收款）</div></div>
+        </div>
+        <div class="empty" v-if="!queue.length && !settles.length"><span class="e-ico">📋</span>暂无进行中的订单<br>顾客下单后将实时显示在这里</div>
+
+        <!-- 待确认 -->
+        <div class="ocard" v-for="o in queue" :key="'qi'+o.id">
+          <div class="oh">
+            <span class="table-no"><template v-if="o.is_takeout"><span style="display:inline-block;background:#FEF3E2;color:#B45309;font-size:11px;border-radius:5px;padding:2px 8px;font-weight:800">🥡 外带</span></template><template v-else>{{ o.table_name }}</template></span>
+            <span class="time" :style="statusColor(o.status_text)">{{ o.status_text }} · {{ o.order_no }}</span>
+          </div>
+          <div class="items">
+            <div v-for="i in o.items" :key="i.id"><span class="dish-ico" v-if="emojiMap[i.dish_id]">{{ emojiMap[i.dish_id] }}</span>{{ i.name }} ×{{ i.qty }}
+              <span class="opt" v-if="optText(i.options)">（{{ optText(i.options) }}）</span>
+            </div>
+          </div>
+          <div class="remark" v-if="o.remark">备注：{{ o.remark }}</div>
+          <div class="of">
+            <span class="total">应收 · 含餐具费¥{{ fee(o).toFixed(2) }}<b>¥{{ rcv(o).toFixed(2) }}</b></span>
+            <div class="btns">
+              <button class="btn danger" @click="openReject(o)">拒绝</button>
+              <button class="btn ghost" @click="openModify(o)">修改</button>
+              <button class="btn primary" @click="confirmOrder(o)">确认</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 已确认/已出餐 · 未结账 -->
+        <div class="ocard" v-for="o in settles" :key="'si'+o.id">
+          <div class="oh">
+            <span class="table-no"><template v-if="o.is_takeout"><span style="display:inline-block;background:#FEF3E2;color:#B45309;font-size:11px;border-radius:5px;padding:2px 8px;font-weight:800">🥡 外带</span></template><template v-else>{{ o.table_name }}</template></span>
+            <span class="time" :style="statusColor(o.status_text)">{{ o.status_text }} · {{ o.order_no }}</span>
+          </div>
+          <div class="items">
+            <div v-for="i in o.items" :key="i.id"><span class="dish-ico" v-if="emojiMap[i.dish_id]">{{ emojiMap[i.dish_id] }}</span>{{ i.name }} ×{{ i.qty }}
+              <span class="add-tag" v-if="i.is_add">加</span>
+              <span class="opt" v-if="optText(i.options)">（{{ optText(i.options) }}）</span>
+              <span style="font-size:11px;color:#1F9D55" v-if="i.status==='out'"> ✓已出</span>
+            </div>
+          </div>
+          <div class="remark" v-if="o.remark">备注：{{ o.remark }}</div>
+          <div class="of">
+            <span class="total">应收 · 含餐具费¥{{ fee(o).toFixed(2) }}<b>¥{{ rcv(o).toFixed(2) }}</b></span>
+            <div class="btns">
+              <button class="btn ghost" @click="openModify(o)">改人数</button>
+              <button class="btn amber" @click="urgeOrder(o)">催单</button>
+              <button class="btn green" @click="openAddDish(o)">代客加菜</button>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- 桌台总览 -->
+      <template v-if="tab==='tables'">
+        <div class="legend">
+          <span><span class="dot" style="background:#1F9D55"></span>空闲</span>
+          <span><span class="dot" style="background:#B45309"></span>待确认</span>
+          <span><span class="dot" style="background:#2563EB"></span>用餐中</span>
+          <span><span class="dot" style="background:#E5484D"></span>待清台</span>
+          <span><span class="dot" style="background:#9BA3B2"></span>停用</span>
+        </div>
+        <div class="wgrid">
+          <div class="wcard" :class="t.state" v-for="t in tables" :key="t.id" @click="openTable(t)">
+            <div class="name">{{ t.name }}</div>
+            <div class="state">{{ t.state_text }}</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px">
+          <button class="btn primary btn-lg" style="flex:1" @click="openWaiterOrder()">＋ 代客下单</button>
+          <button class="btn ghost btn-lg" style="flex:1" @click="openWaiterOrder(null, true)">🥡 外带下单</button>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- 修改订单 -->
+  <div class="mask" v-if="modifyOrder">
+    <div class="sheet">
+      <div class="sh"><b>修改订单 · {{ modifyOrder.table_name }}</b><span class="x" @click="modifyOrder=null">×</span></div>
+      <div class="sb">
+        <div class="tbl-locked" v-if="modifyOrder.status!=='pending_confirm'" style="margin-bottom:10px">
+          <span class="lk-ico">🛎️</span>
+          <div>订单已确认<div style="font-size:11.5px;color:#5A6370;font-weight:500">菜品调整请走「代客加菜」，此处可修改人数 / 餐具 / 备注</div></div>
+        </div>
+        <div class="srow" v-for="i in modifyOrder.items" :key="i.id">
+          <div><span class="dish-ico" v-if="emojiMap[i.dish_id]">{{ emojiMap[i.dish_id] }}</span>{{ i.name }}<div class="opt" v-if="optText(i.options)">{{ optText(i.options) }}</div></div>
+          <div class="qty-ctl" v-if="modifyOrder.status==='pending_confirm'">
+            <button @click="modQty(i, -1)">−</button><span>{{ i.qty }}</span><button @click="modQty(i, 1)">＋</button>
+          </div>
+        </div>
+
+        <!-- 增加菜品 -->
+        <div class="field" style="margin-top:14px" v-if="modifyOrder.status==='pending_confirm'">
+          <button class="btn ghost" style="width:100%" @click="modAddShow=!modAddShow">{{ modAddShow ? '收起菜品选择' : '＋ 增加菜品' }}</button>
+          <template v-if="modAddShow">
+            <div class="dish-search" style="margin-top:10px"><input v-model="modAddFilter" placeholder="搜索菜品名称"></div>
+            <div class="cat-chips" style="margin-top:8px">
+              <span class="cc" :class="{sel: modAddCat===''}" @click="modAddCat=''">全部</span>
+              <span class="cc" v-for="c in cats" :key="'mc'+c.id" :class="{sel: modAddCat===c.id}" @click="modAddCat=c.id">{{ c.name }}</span>
+            </div>
+            <div class="dish-pick" style="max-height:200px">
+              <div class="dp" v-for="d in modAddDishes" :key="'md'+d.id" :class="{sel: modAddPicked[d.id]}" @click="modAddToggle(d)">
+                <img class="dp-img" v-if="d.image" :src="d.image">
+                <span class="dp-ico" v-else-if="d.emoji">{{ d.emoji }}</span>
+                <b>{{ d.name }}</b>
+                <span class="dp-price">¥{{ d.price }}</span>
+                <span class="dp-check" v-if="modAddPicked[d.id]">✓</span>
+              </div>
+            </div>
+            <div class="picked-box" v-if="modAddList.length" style="margin-top:10px">
+              <div class="pk" v-for="d in modAddList" :key="'ma'+d.id">
+                <div>
+                  <div class="pk-n"><span class="pk-ico" v-if="d.emoji">{{ d.emoji }}</span>{{ d.name }}</div>
+                  <div class="opt-row" v-if="d.option_template && Object.keys(d.option_template).length">
+                    <template v-for="(vals, k) in d.option_template" :key="k">
+                      <span class="oc" v-for="v in vals" :key="v"
+                        :class="{sel: (d.opts[k]||vals[0])===v}" @click="d.opts[k]=v">{{ v }}</span>
+                    </template>
+                  </div>
+                </div>
+                <div class="qty-ctl">
+                  <button @click="d.qty>1 && d.qty--">−</button><span>{{ d.qty }}</span><button @click="d.qty++">＋</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div class="field">
+          <label v-if="modifyOrder.is_takeout">打包盒数量（外带不按人数收费，1 个盒 ¥1，未结账随时可改）</label>
+          <label v-else>用餐人数 / 餐具（未结账随时可改）</label>
+          <div v-if="modifyOrder.is_takeout" style="display:flex;gap:10px;align-items:center">
+            <select v-model.number="modifyOrder.utensils" style="flex:1">
+              <option v-for="n in 31" :key="n" :value="n-1">{{ n-1 }} 个</option>
+            </select>
+          </div>
+          <div v-else style="display:flex;gap:10px;align-items:center">
+            <select v-model.number="modifyOrder.people" @change="onModPeople" style="flex:1">
+              <option v-for="n in 20" :key="n" :value="n">{{ n }} 人</option>
+            </select>
+            <span style="color:#5A6370;font-size:13px">→</span>
+            <select v-model.number="modifyOrder.utensils" style="flex:1">
+              <option v-for="n in 31" :key="n" :value="n-1">{{ n-1 }} 套餐具</option>
+            </select>
+          </div>
+          <div v-if="modifyOrder.is_takeout" style="font-size:11.5px;color:#5A6370;margin-top:6px">打包盒费按 {{ modifyOrder.utensils }} 个 × ¥1 = ¥{{ modifyOrder.utensils.toFixed(2) }} 计入应收</div>
+          <div v-else style="font-size:11.5px;color:#5A6370;margin-top:6px">改人数时餐具按 1人×1套 自动同步，仍可手动调整；餐具费按 {{ modifyOrder.people }} 人 × ¥1 = ¥{{ modifyOrder.people.toFixed(2) }} 计入应收</div>
+        </div>
+
+        <div class="field">
+          <label>备注</label>
+          <input v-model="modifyOrder.remark" placeholder="订单备注">
+        </div>
+      </div>
+      <div class="sheet-foot">
+        <button class="btn ghost" @click="modifyOrder=null">取消</button>
+        <button class="btn primary" @click="submitModify">保存修改</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 拒绝 -->
+  <div class="mask" v-if="rejectOrder">
+    <div class="sheet">
+      <div class="sh"><b>拒绝订单 · {{ rejectOrder.table_name }}</b><span class="x" @click="rejectOrder=null">×</span></div>
+      <div class="sb">
+        <div class="field">
+          <label>拒单原因（将回传给顾客）</label>
+          <input v-model="rejectReason" placeholder="如：菜品已售罄 / 桌台信息有误">
+        </div>
+      </div>
+      <div class="sheet-foot">
+        <button class="btn ghost" @click="rejectOrder=null">取消</button>
+        <button class="btn danger" @click="submitReject">确认拒绝</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 桌台详情 -->
+  <div class="mask" v-if="tableDetail">
+    <div class="sheet">
+      <div class="sh"><b>{{ tableDetail.name }} 桌 · {{ tableDetail.area }}</b><span class="x" @click="tableDetail=null">×</span></div>
+      <div class="sb">
+        <div class="empty" v-if="!tableDetail.orders.length" style="padding:30px 0">该桌暂无进行中的订单</div>
+        <div class="ocard" v-for="o in tableDetail.orders" :key="o.id" style="margin-bottom:10px">
+          <div class="oh">
+            <span class="table-no" style="font-size:14px">{{ o.order_no }}</span>
+            <span class="time" :style="statusColor(o.status_text)">{{ o.status_text }}</span>
+          </div>
+          <div class="items">
+            <div v-for="i in o.items" :key="i.id"><span class="dish-ico" v-if="emojiMap[i.dish_id]">{{ emojiMap[i.dish_id] }}</span>{{ i.name }} ×{{ i.qty }}
+              <span class="add-tag" v-if="i.is_add">加</span>
+              <span class="opt" v-if="optText(i.options)">（{{ optText(i.options) }}）</span>
+              <span style="font-size:11px;color:#1F9D55" v-if="i.status==='out'"> ✓已出</span>
+              <span style="font-size:11px;color:#B45309" v-if="i.status==='add_pending'"> 待确认加菜</span>
+            </div>
+          </div>
+          <div class="of">
+            <span class="total">含餐具费¥{{ fee(o).toFixed(2) }}<b>¥{{ rcv(o).toFixed(2) }}</b></span>
+            <div class="btns">
+              <template v-if="o.status==='pending_confirm'">
+                <button class="btn danger" @click="openReject(o)">拒绝</button>
+                <button class="btn ghost" @click="openModify(o)">修改</button>
+                <button class="btn primary" @click="confirmOrder(o)">确认</button>
+              </template>
+              <template v-else-if="['confirmed','served'].includes(o.status)">
+                <button class="btn ghost" @click="openModify(o)">改人数</button>
+                <button class="btn amber" @click="urgeOrder(o)">催单</button>
+                <button class="btn green" @click="openAddDish(o)">代客加菜</button>
+              </template>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>桌台状态：{{ tableDetail.state_text }}</label>
+        </div>
+      </div>
+      <div class="sheet-foot">
+        <button class="btn ghost" @click="tableDetail=null">关闭</button>
+        <button class="btn amber" v-if="tableDetail.state==='dirty'" @click="cleanTable(tableDetail)">标记清台</button>
+        <button class="btn green" v-if="tableActiveOrder" @click="openAddDish(tableActiveOrder)">＋ 代客加菜</button>
+        <button class="btn primary" v-else @click="openWaiterOrder(tableDetail)">＋ 代客下单</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 代客加菜 -->
+  <div class="mask" v-if="addDishOrder">
+    <div class="sheet">
+      <div class="sh"><b>代客加菜 · {{ addDishOrder.table_name }}</b><span class="x" @click="addDishOrder=null">×</span></div>
+      <div class="sb">
+        <div class="field">
+          <label>选择菜品（加菜直达后厨，标「加」）</label>
+          <div class="dish-search"><input v-model="addDishFilter" placeholder="搜索菜品名称"></div>
+          <div class="cat-chips" style="margin-top:8px">
+            <span class="cc" :class="{sel: addDishCat===''}" @click="addDishCat=''">全部</span>
+            <span class="cc" v-for="c in cats" :key="'ac'+c.id" :class="{sel: addDishCat===c.id}" @click="addDishCat=c.id">{{ c.name }}</span>
+          </div>
+          <div class="dish-pick" style="max-height:220px">
+            <div class="dp" v-for="d in addDishDishes" :key="'ad'+d.id" :class="{sel: addDishPicked[d.id]}" @click="addDishToggle(d)">
+              <img class="dp-img" v-if="d.image" :src="d.image">
+              <span class="dp-ico" v-else-if="d.emoji">{{ d.emoji }}</span>
+              <b>{{ d.name }}</b>
+              <span class="dp-price">¥{{ d.price }}</span>
+              <span class="dp-check" v-if="addDishPicked[d.id]">✓</span>
+            </div>
+          </div>
+          <div class="picked-box" v-if="addDishList.length" style="margin-top:10px">
+            <div class="pk" v-for="d in addDishList" :key="'ai'+d.id">
+              <div>
+                <div class="pk-n"><span class="pk-ico" v-if="d.emoji">{{ d.emoji }}</span>{{ d.name }}</div>
+                <div class="opt-row" v-if="d.option_template && Object.keys(d.option_template).length">
+                  <template v-for="(vals, k) in d.option_template" :key="k">
+                    <span class="oc" v-for="v in vals" :key="v"
+                      :class="{sel: (d.opts[k]||vals[0])===v}" @click="d.opts[k]=v">{{ v }}</span>
+                  </template>
+                </div>
+              </div>
+              <div class="qty-ctl">
+                <button @click="d.qty>1 && d.qty--">−</button><span>{{ d.qty }}</span><button @click="d.qty++">＋</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sheet-foot">
+        <button class="btn ghost" @click="addDishOrder=null">取消</button>
+        <button class="btn primary" @click="submitAddDish">确认加菜 · ¥{{ addDishTotal.toFixed(2) }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 代客下单 -->
+  <div class="mask" v-if="waiterOrder">
+    <div class="sheet">
+      <div class="sh"><b>{{ waiterOrder.takeout ? '🥡 外带下单' : '代客下单' }}</b><span class="x" @click="waiterOrder=null">×</span></div>
+      <div class="sb">
+        <!-- 外带：不占桌台、无需扫码 -->
+        <div class="tbl-locked" v-if="waiterOrder.takeout">
+          <span class="lk-ico">🥡</span>
+          <div>外带订单 · 不占桌台<div style="font-size:11.5px;color:#5A6370;font-weight:500">无需扫码 · 服务员直接下单，提交后直达后厨</div></div>
+        </div>
+        <!-- 从桌台进入：锁定桌号，无需二次选择 -->
+        <div class="tbl-locked" v-else-if="waiterOrder.locked">
+          <span class="lk-ico">🪑</span>
+          <div>已选桌台：<b>{{ lockedTableName }}</b><div style="font-size:11.5px;color:#5A6370;font-weight:500">顾客已扫码入座 · 无需重复选择</div></div>
+        </div>
+        <!-- 全局进入：先选桌号 -->
+        <div class="field" v-else>
+          <label>选择桌台（仅空闲桌台可开新单；用餐中请进桌台详情代客加菜）</label>
+          <div class="tbl-picker">
+            <span class="t" v-for="t in tables" :key="t.id"
+              :class="{sel: waiterOrder.table_id===t.id, dis: !canPickTable(t)}"
+              @click="pickTable(t)">{{ t.name }}</span>
+          </div>
+        </div>
+
+        <div class="field" v-if="waiterOrder.table_id || waiterOrder.takeout">
+          <label>选择菜品</label>
+          <div class="dish-search"><input v-model="dishFilter" placeholder="搜索菜品名称"></div>
+          <div class="cat-chips" style="margin-top:8px">
+            <span class="cc" :class="{sel: dishCat===''}" @click="dishCat=''">全部</span>
+            <span class="cc" v-for="c in cats" :key="c.id" :class="{sel: dishCat===c.id}" @click="dishCat=c.id">{{ c.name }}</span>
+          </div>
+          <div class="dish-pick">
+            <div class="dp" v-for="d in filteredDishes" :key="d.id" :class="{sel: pickedDish(d)}" @click="toggleDish(d)">
+              <img class="dp-img" v-if="d.image" :src="d.image">
+              <span class="dp-ico" v-else-if="d.emoji">{{ d.emoji }}</span>
+              <b>{{ d.name }}</b>
+              <span class="dp-desc" v-if="d.description">{{ d.description }}</span>
+              <span class="dp-price">¥{{ d.price }}<template v-if="d.option_template && Object.keys(d.option_template).length"> · 选项</template></span>
+              <span class="dp-check" v-if="pickedDish(d)">✓</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field" v-if="pickedList.length">
+          <label>已选菜品（点数量与选项）</label>
+          <div class="picked-box">
+            <div class="pk" v-for="d in pickedList" :key="'p'+d.id">
+              <div>
+                <div class="pk-n"><span class="pk-ico" v-if="d.emoji">{{ d.emoji }}</span>{{ d.name }}<span class="pk-p">¥{{ d.price }}</span></div>
+                <div class="opt-row" v-if="d.option_template && Object.keys(d.option_template).length">
+                  <template v-for="(vals, k) in d.option_template" :key="k">
+                    <span class="oc" v-for="v in vals" :key="v"
+                      :class="{sel: (d.opts[k]||vals[0])===v}" @click="d.opts[k]=v">{{ v }}</span>
+                  </template>
+                </div>
+              </div>
+              <div class="qty-ctl">
+                <button @click="d.qty>1 && d.qty--">−</button><span>{{ d.qty }}</span><button @click="d.qty++">＋</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>备注</label>
+          <input v-model="waiterOrder.remark" placeholder="备注（可选）">
+        </div>
+        <div class="field" v-if="!waiterOrder.takeout">
+          <label>用餐人数</label>
+          <select v-model.number="waiterOrder.people" @change="onPeopleChange">
+            <option v-for="n in 20" :key="n" :value="n">{{ n }} 人</option>
+          </select>
+        </div>
+        <div class="field">
+          <label v-if="waiterOrder.takeout">打包盒数量（外带不按人数收费，1 个盒 ¥1）</label>
+          <label v-else>餐具数量（跟随人数自动同步，可手动调整）</label>
+          <select v-model.number="waiterOrder.utensils">
+            <option v-for="n in 31" :key="n" :value="n-1">{{ n-1 }} {{ waiterOrder.takeout ? '个' : '套' }}</option>
+          </select>
+          <div v-if="waiterOrder.takeout" style="font-size:11.5px;color:#5A6370;margin-top:6px">打包盒费按 {{ waiterOrder.utensils }} 个 × ¥1 = ¥{{ waiterOrder.utensils.toFixed(2) }} 计入应收</div>
+          <div v-else style="font-size:11.5px;color:#5A6370;margin-top:6px">餐具费按 {{ waiterOrder.people }} 人 × ¥1 = ¥{{ waiterOrder.people.toFixed(2) }} 计入应收</div>
+        </div>
+      </div>
+      <div class="sheet-foot">
+        <button class="btn ghost" @click="waiterOrder=null">取消</button>
+        <button class="btn primary" @click="submitWaiterOrder">提交并推送后厨 · ¥{{ waiterTotal.toFixed(2) }}</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" v-if="toast">{{ toast }}</div>
+</div>
+
+<script>
+// 页面由后端托管（http://127.0.0.1:8000/web/waiter/）时用同源地址（任意端口/域名都行）；
+// 直接双击打开（file://）时默认连本机 8000 端口。
+const API_BASE = location.protocol === 'file:' ? 'http://127.0.0.1:8000' : location.origin;
+const WS_BASE = API_BASE.replace('http', 'ws');
+
+function beep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880; g.gain.value = 0.12;
+    o.start(); setTimeout(() => { o.frequency.value = 660; }, 180);
+    setTimeout(() => o.stop(), 420);
+  } catch (e) {}
+}
+
+const app = Vue.createApp({
+  data() {
+    return {
+      API_BASE,
+      token: localStorage.getItem('waiter_token') || '',
+      staff: JSON.parse(localStorage.getItem('waiter_staff') || 'null'),
+      loginForm: { username: '', password: '' },
+      loginErr: '',
+      tab: 'queue',
+      queue: [], adds: [], settles: [], tables: [],
+      tableDetail: null,
+      modifyOrder: null, rejectOrder: null, rejectReason: '',
+      modAddShow: false, modAddFilter: '', modAddCat: '', modAddPicked: {},
+      addDishOrder: null, addDishFilter: '', addDishCat: '', addDishPicked: {},
+      waiterOrder: null, dishes: [], cats: [], emojiMap: {},
+      dishFilter: '', dishCat: '', picked: {},
+      toast: '', toastTimer: null,
+      ws: null, pollTimer: null,
+    };
+  },
+  computed: {
+    roleText() {
+      return ({ admin: '店长', cashier: '收银', waiter: '服务员', kitchen: '后厨' })[this.staff && this.staff.role] || '';
+    },
+    pickedList() {
+      return Object.values(this.picked);
+    },
+    modAddList() {
+      return Object.values(this.modAddPicked);
+    },
+    waiterTotal() {
+      const wo = this.waiterOrder;
+      const dishes = this.pickedList.reduce((s, d) => s + d.price * d.qty, 0);
+      if (!wo) return dishes;
+      // 堂食：按人数收餐具费；外带：按打包盒数量收盒费（1 元/盒）
+      return dishes + (wo.takeout ? Number(wo.utensils || 0) : Number(wo.people || 0));
+    },
+    settleTotal() {
+      return this.settles.reduce((s, o) => s + Number(o.total_amount) + Number(o.utensil_fee || 0), 0);
+    },
+    addDishList() {
+      return Object.values(this.addDishPicked);
+    },
+    addDishTotal() {
+      return this.addDishList.reduce((s, d) => s + d.price * d.qty, 0);
+    },
+    tableActiveOrder() {
+      if (!this.tableDetail) return null;
+      const list = (this.tableDetail.orders || []).filter((o) => ['confirmed', 'served'].includes(o.status));
+      return list.length ? list[list.length - 1] : null;
+    },
+    lockedTableName() {
+      if (!this.waiterOrder) return '';
+      const t = this.tables.find((x) => x.id === this.waiterOrder.table_id);
+      return t ? t.name : '';
+    },
+    filteredDishes() {
+      const kw = this.dishFilter.trim();
+      return this.dishes.filter((d) => {
+        if (d.status === 'off' || d.status === 'soldout') return false;
+        if (this.dishCat && d.category_id !== this.dishCat) return false;
+        if (kw && d.name.indexOf(kw) < 0) return false;
+        return true;
+      });
+    },
+    modAddDishes() {
+      const kw = this.modAddFilter.trim();
+      return this.dishes.filter((d) => {
+        if (d.status === 'off' || d.status === 'soldout') return false;
+        if (this.modAddCat && d.category_id !== this.modAddCat) return false;
+        if (kw && d.name.indexOf(kw) < 0) return false;
+        return true;
+      });
+    },
+    addDishDishes() {
+      const kw = this.addDishFilter.trim();
+      return this.dishes.filter((d) => {
+        if (d.status === 'off' || d.status === 'soldout') return false;
+        if (this.addDishCat && d.category_id !== this.addDishCat) return false;
+        if (kw && d.name.indexOf(kw) < 0) return false;
+        return true;
+      });
+    },
+  },
+  methods: {
+    say(msg) {
+      this.toast = msg;
+      clearTimeout(this.toastTimer);
+      this.toastTimer = setTimeout(() => { this.toast = ''; }, 1800);
+    },
+    rcv(o) {
+      return Number(o.total_amount || 0) + Number(o.utensil_fee || 0);
+    },
+    fee(o) {
+      return Number(o.utensil_fee || 0);
+    },
+    optText(opts) {
+      if (!opts) return '';
+      return Object.keys(opts).map((k) => opts[k]).join(' / ');
+    },
+    statusColor(text) {
+      return { '待确认': 'color:#B45309;font-weight:700', '已确认': 'color:#2563EB;font-weight:700',
+               '已出餐': 'color:#1F9D55;font-weight:700', '已结账': 'color:#5A6370', '已取消': 'color:#E5484D' }[text] || '';
+    },
+    async api(url, method, body) {
+      const res = await fetch(API_BASE + url, {
+        method: method || 'GET',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + this.token },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 401) { this.logout(); }
+        throw new Error(data.detail || '请求失败');
+      }
+      return data;
+    },
+    fillAccount(u) {
+      this.loginForm.username = u;
+      this.loginForm.password = '123456';
+    },
+    async doLogin() {
+      this.loginErr = '';
+      try {
+        const data = await (await fetch(API_BASE + '/api/staff/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(this.loginForm),
+        })).json();
+        if (!data.token) { this.loginErr = data.detail || '登录失败'; return; }
+        this.token = data.token; this.staff = data.staff;
+        localStorage.setItem('waiter_token', data.token);
+        localStorage.setItem('waiter_staff', JSON.stringify(data.staff));
+        this.boot();
+      } catch (e) { this.loginErr = '无法连接服务器'; }
+    },
+    logout() {
+      localStorage.removeItem('waiter_token');
+      localStorage.removeItem('waiter_staff');
+      this.token = ''; this.staff = null;
+      if (this.ws) this.ws.close();
+    },
+    boot() {
+      this.refreshAll();
+      this.loadMenu();
+      this.pollTimer = setInterval(() => this.refreshAll(), 8000);
+      this.connectWs();
+    },
+    loadMenu() {
+      this.api('/api/customer/menu').then((menu) => {
+        this.dishes = menu.categories.reduce((a, c) => a.concat(c.dishes.map((d) => ({ ...d, category_id: d.category_id || c.id }))), []);
+        this.cats = menu.categories;
+        const map = {};
+        this.dishes.forEach((d) => { if (d.emoji) map[d.id] = d.emoji; });
+        this.emojiMap = map;
+      }).catch(() => {});
+    },
+    async refreshAll() {
+      if (!this.token) return;
+      try {
+        const [q, a, s, t] = await Promise.all([
+          this.api('/api/waiter/queue'),
+          this.api('/api/waiter/add-queue'),
+          this.api('/api/waiter/settle-queue'),
+          this.api('/api/waiter/tables'),
+        ]);
+        this.queue = q; this.adds = a; this.settles = s; this.tables = t;
+        if (this.tableDetail) {
+          const cur = t.find((x) => x.id === this.tableDetail.id);
+          if (cur) this.tableDetail = { ...this.tableDetail, ...cur };
+        }
+      } catch (e) {}
+    },
+    connectWs() {
+      if (!this.token) return;
+      const ws = new WebSocket(WS_BASE + '/ws/waiter?token=' + this.token);
+      this.ws = ws;
+      ws.onmessage = (ev) => {
+        try {
+          const msg = JSON.parse(ev.data);
+          if (['new_order', 'order_updated', 'add_request', 'table_refresh'].includes(msg.type)) {
+            this.refreshAll();
+            if (msg.type === 'new_order') beep();
+          }
+        } catch (e) {}
+      };
+      ws.onclose = () => { if (this.token) setTimeout(() => this.connectWs(), 3000); };
+    },
+    // ---- 待确认 ----
+    async confirmOrder(o) {
+      try {
+        await this.api('/api/waiter/orders/' + o.id + '/confirm', 'POST');
+        this.say('已确认 · 推送后厨');
+        this.refreshAll();
+      } catch (e) { this.say(e.message); }
+    },
+    openModify(o) {
+      this.modifyOrder = JSON.parse(JSON.stringify(o));
+      this.modAddShow = false; this.modAddFilter = ''; this.modAddCat = ''; this.modAddPicked = {};
+      if (!this.dishes.length) this.loadMenu();
+    },
+    modQty(item, delta) {
+      item.qty = Math.max(0, item.qty + delta);
+    },
+    onModPeople() {
+      // 改人数时餐具自动跟随（1人×1套），仍可手动调整
+      this.modifyOrder.utensils = Number(this.modifyOrder.people);
+    },
+    modAddToggle(d) {
+      if (this.modAddPicked[d.id]) {
+        Vue.delete(this.modAddPicked, d.id);
+      } else {
+        this.modAddPicked[d.id] = { id: d.id, name: d.name, price: d.price, qty: 1,
+          emoji: d.emoji || '', option_template: d.option_template || null, opts: {} };
+      }
+    },
+    async submitModify() {
+      const o = this.modifyOrder;
+      // 仅待确认阶段允许调整菜品数量/增删菜；已确认后菜品走代客加菜，人数/餐具/备注随时可改
+      const isPending = o.status === 'pending_confirm';
+      const ops = isPending ? o.items.map((i) => ({ item_id: i.id, qty: i.qty })) : [];
+      const addOps = isPending ? this.modAddList.map((d) => ({
+        dish_id: d.id, qty: d.qty,
+        options: Object.keys(d.opts || {}).length ? { ...d.opts } : null,
+      })) : [];
+      try {
+        await this.api('/api/waiter/orders/' + o.id + '/modify', 'POST', {
+          remark: o.remark,
+          people: o.people,
+          utensils: o.utensils,
+          items: [...ops, ...addOps],
+        });
+        this.modifyOrder = null;
+        this.modAddShow = false; this.modAddPicked = {};
+        this.say('订单已修改');
+        this.refreshAll();
+      } catch (e) { this.say(e.message); }
+    },
+    openReject(o) { this.rejectOrder = o; this.rejectReason = ''; },
+    async submitReject() {
+      try {
+        await this.api('/api/waiter/orders/' + this.rejectOrder.id + '/reject', 'POST',
+          { reason: this.rejectReason || '服务员拒单' });
+        this.rejectOrder = null;
+        this.say('已拒单并通知顾客');
+        this.refreshAll();
+      } catch (e) { this.say(e.message); }
+    },
+    // ---- 加菜 ----
+    async confirmAdd(o) {
+      try {
+        await this.api('/api/waiter/orders/' + o.id + '/confirm-add', 'POST');
+        this.say('加菜已推送后厨');
+        this.refreshAll();
+      } catch (e) { this.say(e.message); }
+    },
+    // ---- 代客加菜 ----
+    openAddDish(o) {
+      this.addDishOrder = JSON.parse(JSON.stringify(o));
+      this.addDishFilter = ''; this.addDishCat = ''; this.addDishPicked = {};
+      if (!this.dishes.length) this.loadMenu();
+    },
+    addDishToggle(d) {
+      if (this.addDishPicked[d.id]) {
+        Vue.delete(this.addDishPicked, d.id);
+      } else {
+        this.addDishPicked[d.id] = { id: d.id, name: d.name, price: d.price, qty: 1,
+          emoji: d.emoji || '', option_template: d.option_template || null, opts: {} };
+      }
+    },
+    async submitAddDish() {
+      const o = this.addDishOrder;
+      const items = this.addDishList.map((d) => ({
+        dish_id: d.id, qty: d.qty,
+        options: Object.keys(d.opts || {}).length ? { ...d.opts } : null,
+      }));
+      if (!items.length) { this.say('请选择要加的菜品'); return; }
+      try {
+        await this.api('/api/waiter/orders/' + o.id + '/add', 'POST', { items });
+        this.addDishOrder = null;
+        this.addDishPicked = {};
+        this.say('加菜已直达后厨');
+        await this.refreshAll();
+        // 桌台详情中的订单明细同步刷新
+        if (this.tableDetail && this.tableDetail.id === o.table_id) {
+          try {
+            const orders = await this.api('/api/waiter/orders?table_id=' + o.table_id);
+            this.tableDetail.orders = orders.filter((x) => !['paid', 'cancelled'].includes(x.status));
+          } catch (e) {}
+        }
+      } catch (e) { this.say(e.message); }
+    },
+    // ---- 桌台 ----
+    async openTable(t) {
+      try {
+        const orders = await this.api('/api/waiter/orders?table_id=' + t.id);
+        this.tableDetail = { ...t, orders: orders.filter((o) => !['paid', 'cancelled'].includes(o.status)) };
+      } catch (e) { this.say(e.message); }
+    },
+    async cleanTable(t) {
+      try {
+        await this.api('/api/waiter/tables/' + t.id + '/clean', 'POST');
+        this.say(t.name + ' 已清台');
+        this.tableDetail = null;
+        this.refreshAll();
+      } catch (e) { this.say(e.message); }
+    },
+    async urgeOrder(o) {
+      try {
+        await this.api('/api/waiter/orders/' + o.id + '/urge', 'POST');
+        this.say('已催单 · KDS 置顶标红');
+        this.refreshAll();
+      } catch (e) { this.say(e.message); }
+    },
+    // ---- 代客下单 ----
+    async openWaiterOrder(table, takeout) {
+      // 从桌台详情进入：锁定该桌，不再二次选择；takeout=true：外带单，不占桌台
+      this.waiterOrder = takeout
+        ? { takeout: true, locked: true, table_id: 0, remark: '', people: 1, utensils: 1 }
+        : { table_id: table ? table.id : 0, locked: !!table, remark: '', people: 2, utensils: 2 };
+      this.picked = {};
+      this.dishFilter = ''; this.dishCat = '';
+      if (!this.dishes.length) {
+        try {
+          const menu = await this.api('/api/customer/menu');
+          this.dishes = menu.categories.reduce((a, c) => a.concat(c.dishes.map((d) => ({ ...d, category_id: d.category_id || c.id }))), []);
+          this.cats = menu.categories;
+          const map = {};
+          this.dishes.forEach((d) => { if (d.emoji) map[d.id] = d.emoji; });
+          this.emojiMap = map;
+        } catch (e) { this.say(e.message); }
+      }
+    },
+    canPickTable(t) {
+      // 全局入口仅可给空闲桌台开新单；用餐中/待确认的桌台请进桌台详情「代客加菜」
+      return t.enabled !== false && t.state === 'free';
+    },
+    pickTable(t) {
+      if (this.waiterOrder.locked || !this.canPickTable(t)) return;
+      this.waiterOrder.table_id = t.id;
+    },
+    pickedDish(d) { return !!this.picked[d.id]; },
+    toggleDish(d) {
+      if (this.picked[d.id]) {
+        Vue.delete(this.picked, d.id);
+      } else {
+        this.picked[d.id] = { id: d.id, name: d.name, price: d.price, qty: 1,
+          emoji: d.emoji || '', option_template: d.option_template || null, opts: {} };
+      }
+    },
+    onPeopleChange() {
+      // 餐具数量跟随人数 ×1 自动同步，仍可手动调整
+      this.waiterOrder.utensils = Number(this.waiterOrder.people);
+    },
+    async submitWaiterOrder() {
+      if (!this.waiterOrder.takeout && !this.waiterOrder.table_id) { this.say('请先选择桌台'); return; }
+      const items = this.pickedList.map((d) => ({
+        dish_id: d.id, qty: d.qty,
+        options: Object.keys(d.opts).length ? { ...d.opts } : null,
+      }));
+      if (!items.length) { this.say('请选择菜品'); return; }
+      const body = {
+        items,
+        remark: this.waiterOrder.remark,
+        people: this.waiterOrder.people,
+        utensils: this.waiterOrder.utensils || 0,
+      };
+      if (this.waiterOrder.takeout) body.takeout = true;
+      else body.table_id = this.waiterOrder.table_id;
+      try {
+        await this.api('/api/waiter/orders', 'POST', body);
+        this.waiterOrder = null;
+        this.say(body.takeout ? '外带单已下单 · 直达后厨' : '已下单并直接推送后厨');
+        this.refreshAll();
+      } catch (e) { this.say(e.message); }
+    },
+  },
+  mounted() {
+    if (this.token) this.boot();
+  },
+});
+app.mount('#app');
+</script>
+</body>
+</html>

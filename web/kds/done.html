@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>已出餐 · 后厨大屏 KDS</title>
+<script src="../vendor/vue.global.prod.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:#0B0C10; }
+[v-cloak] { display:none; }
+
+.page { min-height:100vh; background:#0E1712; color:#EAF5EE; display:flex; flex-direction:column; }
+.top { display:flex; align-items:center; gap:12px; padding:14px 18px; background:#14211B; border-bottom:1px solid #243B2F; flex-wrap:wrap; }
+.top .kt { font-size:20px; font-weight:800; color:#2FBF71; }
+.back-link { font-size:13px; font-weight:800; color:#2FBF71; border:1px solid #2FBF71; border-radius:999px; padding:7px 16px; cursor:pointer; text-decoration:none; }
+.chip { font-size:12.5px; color:#7E9688; border:1px solid #243B2F; border-radius:999px; padding:4px 12px; white-space:nowrap; }
+.clock { margin-left:auto; font-size:20px; font-weight:800; font-variant-numeric:tabular-nums; }
+
+.wrap { flex:1; padding:14px; display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:12px; align-content:start; }
+.card { background:#14211B; border:1px solid #243B2F; border-radius:14px; padding:14px; }
+.card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+.table-no { font-size:26px; font-weight:900; color:#2FBF71; line-height:1; }
+.card-top .info { text-align:right; }
+.card-top .t { display:block; font-size:12px; color:#7E9688; }
+.card-top .tm { display:block; font-size:13px; font-weight:700; color:#EAF5EE; }
+ul { list-style:none; }
+li { display:flex; justify-content:space-between; align-items:center; padding:9px 6px; border-bottom:1px dashed #243B2F; font-size:15.5px; color:#C9D8CE; }
+li:last-child { border-bottom:none; }
+li .opt { font-size:12px; color:#7E9688; margin-left:6px; }
+li .add-tag { display:inline-block; background:#2FBF71; color:#06210F; font-size:10px; font-weight:800; border-radius:5px; padding:1px 6px; margin-left:5px; vertical-align:1px; }
+li .right { display:flex; align-items:center; gap:10px; }
+li .q { color:#7E9688; font-size:14px; }
+li .out-t { font-size:11.5px; color:#2FBF71; font-weight:700; }
+.done-stamp { display:inline-block; background:#2FBF71; color:#06210F; font-size:11px; font-weight:800; border-radius:6px; padding:2px 9px; margin-left:6px; }
+.paid-tag { display:inline-block; background:#F5C044; color:#3A2A05; font-size:11px; font-weight:800; border-radius:6px; padding:2px 9px; margin-left:6px; }
+.remark { margin-top:8px; font-size:12.5px; color:#F5C044; background:rgba(245,192,68,.08); border-radius:8px; padding:6px 10px; }
+.empty { text-align:center; color:#7E9688; font-size:14px; padding:60px 0; }
+.toast { position:fixed; top:16px; left:50%; transform:translateX(-50%); background:#14211B; border:1px solid #2FBF71; color:#EAF5EE; font-size:14px; border-radius:10px; padding:10px 22px; z-index:99; }
+</style>
+</head>
+<body>
+<div id="app" v-cloak>
+  <div class="page">
+    <div class="top">
+      <span class="kt">后厨大屏 · 已出餐</span>
+      <a class="back-link" href="index.html">← 返回出餐看板</a>
+      <span class="chip">当日整单出完的订单自动汇总在此（含已结账）</span>
+      <span class="clock">{{ clock }}</span>
+    </div>
+
+    <div class="wrap">
+      <div class="card" v-for="o in done" :key="o.id">
+        <div class="card-top">
+          <span class="table-no">{{ o.table_name }}</span>
+          <span class="info">
+            <span class="t">{{ o.order_no }}</span>
+            <span class="tm">{{ o.finished_at }} 整单出完<span class="done-stamp">已出餐 ✓</span><span class="paid-tag" v-if="o.paid">已结账</span></span>
+          </span>
+        </div>
+        <ul>
+          <li v-for="i in o.items" :key="i.id">
+            <span>{{ i.name }}<span class="opt" v-if="optText(i.options)">（{{ optText(i.options) }}）</span><span class="add-tag" v-if="i.is_add">加</span></span>
+            <span class="right"><span class="q">×{{ i.qty }}</span><span class="out-t">{{ i.out_at || '已出' }}</span></span>
+          </li>
+        </ul>
+        <div class="remark" v-if="o.remark">备注：{{ o.remark }}</div>
+      </div>
+      <div class="empty" v-if="!done.length" style="grid-column:1/-1">今日暂无已出餐订单<br>整单出完的订单会出现在这里</div>
+    </div>
+  </div>
+
+  <div class="toast" v-if="toast">{{ toast }}</div>
+</div>
+
+<script>
+// 与 KDS 同源共享登录态（localStorage.kds_token）
+const API_BASE = location.protocol === 'file:' ? 'http://127.0.0.1:8000' : location.origin;
+
+const app = Vue.createApp({
+  data() {
+    return {
+      token: localStorage.getItem('kds_token') || '',
+      done: [],
+      clock: '',
+      toast: '', toastTimer: null,
+      pollTimer: null, clockTimer: null,
+    };
+  },
+  methods: {
+    say(msg) {
+      this.toast = msg;
+      clearTimeout(this.toastTimer);
+      this.toastTimer = setTimeout(() => { this.toast = ''; }, 2200);
+    },
+    optText(opts) {
+      if (!opts) return '';
+      return Object.keys(opts).map((k) => opts[k]).join('/');
+    },
+    async refresh() {
+      if (!this.token) return;
+      try {
+        const res = await fetch(API_BASE + '/api/kds/done', {
+          headers: { 'Authorization': 'Bearer ' + this.token },
+        });
+        if (res.status === 401) { location.href = 'index.html'; return; }
+        const data = await res.json().catch(() => []);
+        this.done = Array.isArray(data) ? data : [];
+      } catch (e) {}
+    },
+  },
+  mounted() {
+    if (!this.token) { location.href = 'index.html'; return; }
+    this.refresh();
+    this.pollTimer = setInterval(() => this.refresh(), 5000);
+    this.clockTimer = setInterval(() => {
+      const d = new Date();
+      const p = (n) => (n < 10 ? '0' : '') + n;
+      this.clock = p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+    }, 1000);
+  },
+});
+app.mount('#app');
+</script>
+</body>
+</html>

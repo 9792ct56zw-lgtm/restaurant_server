@@ -1,0 +1,63 @@
+<view class="page" wx:if="{{!loading && order}}">
+  <!-- 状态卡片 -->
+  <view class="status-card">
+    <view class="sc-title">{{statusCard.title}}</view>
+    <view class="sc-sub">{{statusCard.sub}}</view>
+  </view>
+
+  <!-- 三步进度 -->
+  <view class="steps">
+    <view wx:for="{{steps}}" wx:key="key" class="step {{item.done ? 'done' : ''}} {{item.now ? 'now' : ''}}">
+      <view class="circle">{{item.done ? '✓' : index + 1}}</view>
+      <view class="label">{{item.label}}</view>
+    </view>
+  </view>
+
+  <!-- 订单信息 -->
+  <view class="card">
+    <view class="card-head">
+      <text class="order-no">单号 {{order.order_no}}</text>
+      <text class="table-chip">{{order.table_name}} 桌</text>
+    </view>
+    <view class="item" wx:for="{{items}}" wx:key="id">
+      <view class="i-left">
+        <view class="i-name">
+          <text>{{item.name}}</text>
+          <text class="add-badge" wx:if="{{item.is_add}}">加</text>
+        </view>
+        <view class="i-opt" wx:if="{{item.optionsText}}">{{item.optionsText}}</view>
+      </view>
+      <view class="i-right">
+        <text class="i-qty">×{{item.qty}}</text>
+        <text class="i-chip {{item.statusCls}}">{{item.statusText}}</text>
+      </view>
+    </view>
+    <view class="remark" wx:if="{{order.remark}}">备注：{{order.remark}}</view>
+    <view class="fee-line" wx:if="{{utensilFee !== '0.00'}}">
+      <text>餐具费（{{order.people}}人 × ¥1）</text>
+      <text class="price">¥{{utensilFee}}</text>
+    </view>
+    <view class="total-row">
+      <text>共 {{items.length}} 种 · 合计</text>
+      <text class="price total">¥{{total}}</text>
+    </view>
+  </view>
+
+  <!-- 操作 -->
+  <view class="actions">
+    <button class="btn-plain act-btn" bindtap="goAdd">补单 · 加菜</button>
+    <button class="btn-plain act-btn danger" bindtap="goCancel"
+      wx:if="{{order.status !== 'paid' && order.status !== 'cancelled'}}">取消订单</button>
+    <button class="btn-plain act-btn" bindtap="backMenu"
+      wx:if="{{order.status === 'paid' || order.status === 'cancelled'}}">返回菜单</button>
+  </view>
+
+  <view class="pay-tip" wx:if="{{order.status === 'paid'}}">
+    已结账（{{order.pay_method === 'cash' ? '现金' : '商户收款码'}}）· 感谢惠顾
+  </view>
+  <view class="pay-tip" wx:if="{{order.status !== 'paid' && order.status !== 'cancelled'}}">
+    结账请至收银台 · 本店支持现金 / 扫码付款
+  </view>
+</view>
+
+<view class="empty-tip" wx:if="{{loading}}">加载中…</view>

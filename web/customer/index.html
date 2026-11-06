@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>扫码点餐</title>
+<script src="../vendor/vue.global.prod.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  background: #F6F4F1; color: #1F2329; font-size: 15px;
+}
+[v-cloak] { display: none; }
+#app { max-width: 520px; margin: 0 auto; min-height: 100%; background: #F6F4F1; }
+
+/* ===== 顶栏 ===== */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; padding-top: calc(10px + env(safe-area-inset-top));
+  background: #fff; border-bottom: 1px solid #EFEDE9;
+}
+.topbar .back { width: 30px; height: 30px; border-radius: 8px; background: #F6F4F1;
+  display: flex; align-items: center; justify-content: center; font-size: 18px; color: #5A6472; flex: none; cursor: pointer; }
+.topbar .shop { flex: 1; font-size: 17px; font-weight: 700; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar .tchip {
+  flex: none; background: #E8F8EE; color: #07C160; font-size: 12.5px; font-weight: 600;
+  padding: 5px 10px; border-radius: 999px; white-space: nowrap;
+}
+.topbar .tchip.add { background: #FFF4E5; color: #E85518; }
+
+/* ===== 选桌页 ===== */
+.pick-view { padding: 20px 16px calc(90px + env(safe-area-inset-bottom)); }
+.scan-hint {
+  background: linear-gradient(135deg, #07C160, #05A34F); color: #fff; border-radius: 14px;
+  padding: 20px 18px; margin-bottom: 18px; line-height: 1.65; font-size: 14.5px;
+}
+.scan-hint b { font-size: 16px; }
+.scan-hint .qricon { font-size: 26px; margin-right: 8px; vertical-align: -4px; }
+.pick-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #3C4350; }
+.table-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.tcell {
+  background: #fff; border: 1px solid #EFEDE9; border-radius: 12px; padding: 14px 6px 12px;
+  text-align: center; cursor: pointer; transition: transform .08s;
+}
+.tcell:active { transform: scale(.95); }
+.tcell .no { font-size: 18px; font-weight: 800; }
+.tcell .seats { font-size: 11.5px; color: #8A94A6; margin-top: 3px; }
+
+/* ===== 菜单页 ===== */
+.notice {
+  background: #FFF8EC; color: #B45309; font-size: 13px; padding: 9px 14px;
+  border-bottom: 1px solid #F7E9D2; line-height: 1.5;
+}
+.catbar {
+  position: sticky; top: calc(51px + env(safe-area-inset-top)); z-index: 40;
+  display: flex; gap: 8px; overflow-x: auto; background: #fff;
+  padding: 9px 12px; border-bottom: 1px solid #EFEDE9; scrollbar-width: none;
+}
+.catbar::-webkit-scrollbar { display: none; }
+.cat {
+  flex: none; font-size: 13.5px; color: #5A6472; background: #F6F4F1; border-radius: 999px;
+  padding: 7px 14px; cursor: pointer; white-space: nowrap;
+}
+.cat.on { background: #07C160; color: #fff; font-weight: 600; }
+.dish-list { padding: 8px 12px calc(110px + env(safe-area-inset-bottom)); }
+.sec { scroll-margin-top: calc(94px + env(safe-area-inset-top)); }
+.sec-title { font-size: 14.5px; font-weight: 800; color: #3C4350; padding: 14px 2px 8px; }
+.dish {
+  background: #fff; border-radius: 14px; padding: 10px; margin-bottom: 10px;
+  display: flex; gap: 10px; border: 1px solid #EFEDE9;
+}
+.dimg { width: 84px; height: 84px; border-radius: 10px; object-fit: cover; flex: none; background: #F6F4F1; }
+.dinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.dname { font-size: 15.5px; font-weight: 700; line-height: 1.4; }
+.badge {
+  display: inline-block; font-size: 10.5px; font-weight: 600; padding: 1.5px 6px;
+  border-radius: 5px; vertical-align: 2px;
+}
+.badge.sign { background: #FFF0E6; color: #E85518; }
+.badge.hot { background: #FFF0F0; color: #DC2626; }
+.ddesc {
+  font-size: 12px; color: #8A94A6; margin-top: 3px; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+}
+.drow { margin-top: auto; display: flex; align-items: center; justify-content: space-between; padding-top: 6px; }
+.dprice { color: #E85518; font-weight: 800; font-size: 16px; }
+.dprice .yen { font-size: 12px; }
+.addbtn {
+  width: 30px; height: 30px; border-radius: 50%; background: #07C160; color: #fff;
+  font-size: 18px; line-height: 28px; text-align: center; cursor: pointer; flex: none;
+}
+.addbtn:active { transform: scale(.9); }
+.stepper { display: flex; align-items: center; gap: 12px; flex: none; }
+.step-btn {
+  width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 1px solid #D9DEE7;
+  color: #07C160; font-size: 16px; line-height: 24px; text-align: center; cursor: pointer;
+}
+.step-btn.sub { color: #5A6472; }
+.step-btn:active { transform: scale(.9); }
+.step-num { min-width: 18px; text-align: center; font-weight: 700; font-size: 14.5px; }
+
+/* ===== 底部购物车栏 ===== */
+.cartbar {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; z-index: 60;
+  width: 100%; max-width: 520px;
+  padding: 10px 14px calc(12px + env(safe-area-inset-bottom));
+  background: #fff; border-top: 1px solid #EFEDE9;
+  display: flex; align-items: center; gap: 12px;
+}
+.carticon {
+  position: relative; width: 46px; height: 46px; border-radius: 50%; flex: none;
+  background: #07C160; color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center;
+}
+.carticon.gray { background: #D9DEE7; }
+.carticon .cnt {
+  position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 4px;
+  background: #E85518; color: #fff; border-radius: 999px; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.cartinfo { flex: 1; min-width: 0; }
+.cartinfo .total { font-size: 19px; font-weight: 800; color: #E85518; }
+.cartinfo .total .yen { font-size: 13px; }
+.cartinfo .sub { font-size: 11.5px; color: #8A94A6; }
+.submit-btn {
+  flex: none; background: #07C160; color: #fff; border-radius: 999px; font-weight: 700;
+  padding: 12px 24px; font-size: 15px; cursor: pointer; white-space: nowrap;
+}
+.submit-btn:active { opacity: .85; }
+.submit-btn.addmode { background: #E85518; }
+
+/* ===== 弹层通用 ===== */
+.mask {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.mask.center { align-items: center; padding: 0 24px; }
+.sheet {
+  width: 100%; max-width: 520px; background: #fff; border-radius: 18px 18px 0 0;
+  max-height: 82vh; display: flex; flex-direction: column; overflow: hidden;
+}
+.sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 16px 10px; }
+.sheet-head .t { font-size: 16px; font-weight: 800; }
+.sheet-head .clear { font-size: 13px; color: #8A94A6; cursor: pointer; }
+.sheet-body { overflow-y: auto; padding: 2px 16px 16px; }
+.citem { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px dashed #EFEDE9; }
+.citem .cname { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 600; }
+.citem .copts { font-size: 11.5px; color: #8A94A6; margin-top: 2px; }
+.citem .cprice { color: #E85518; font-weight: 700; font-size: 13.5px; width: 52px; text-align: right; flex: none; }
+.optrow { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #F2F0EC; }
+.optrow .olabel { font-size: 14px; color: #3C4350; }
+.optrow .olabel small { display: block; color: #8A94A6; font-size: 11.5px; margin-top: 2px; }
+.remark-input {
+  width: 100%; border: 1px solid #E7E5E0; border-radius: 10px; padding: 10px 12px;
+  font-size: 14px; font-family: inherit; margin-top: 12px; resize: none; outline: none; background: #FBFBF9;
+}
+.remark-input:focus { border-color: #07C160; background: #fff; }
+.summary { margin-top: 12px; background: #F8F7F4; border-radius: 12px; padding: 12px 14px; }
+.sumrow { display: flex; justify-content: space-between; font-size: 13.5px; color: #5A6472; padding: 3px 0; }
+.sumrow.grand { border-top: 1px dashed #E2DFD8; margin-top: 7px; padding-top: 9px; font-size: 15px; font-weight: 800; color: #1F2329; }
+.sumrow.grand .v { color: #E85518; font-size: 17px; }
+.pay-btn {
+  width: 100%; background: #07C160; color: #fff; border: none; border-radius: 999px;
+  padding: 14px; font-size: 16px; font-weight: 700; margin-top: 12px; cursor: pointer; font-family: inherit;
+}
+.pay-btn:active { opacity: .85; }
+.pay-btn:disabled { background: #B9E8CC; }
+
+/* ===== 规格弹层 ===== */
+.spec-card {
+  width: 100%; max-width: 520px; background: #fff; border-radius: 18px; padding: 18px 16px 16px;
+}
+.spec-card .sname { font-size: 17px; font-weight: 800; }
+.spec-card .sprice { color: #E85518; font-weight: 800; margin: 4px 0 12px; }
+.spec-group { margin-bottom: 14px; }
+.spec-group .glabel { font-size: 13.5px; font-weight: 700; color: #3C4350; margin-bottom: 8px; }
+.spec-vals { display: flex; flex-wrap: wrap; gap: 8px; }
+.spec-val {
+  border: 1px solid #D9DEE7; border-radius: 999px; padding: 7px 15px; font-size: 13.5px;
+  cursor: pointer; background: #fff; color: #3C4350;
+}
+.spec-val.on { border-color: #07C160; background: #E8F8EE; color: #07C160; font-weight: 600; }
+.spec-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.spec-ok {
+  background: #07C160; color: #fff; border: none; border-radius: 999px; padding: 11px 30px;
+  font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.spec-ok:active { opacity: .85; }
+
+/* ===== 确认弹层 ===== */
+.cfm-card { width: 100%; max-width: 520px; background: #fff; border-radius: 18px; padding: 22px 20px 18px; text-align: center; }
+.cfm-card .m { font-size: 15.5px; line-height: 1.6; margin: 6px 0 20px; }
+.cfm-btns { display: flex; gap: 12px; }
+.cfm-btns button {
+  flex: 1; border: none; border-radius: 999px; padding: 12px; font-size: 15px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+}
+.cfm-no { background: #F2F0EC; color: #3C4350; }
+.cfm-ok { background: #E85518; color: #fff; }
+
+/* ===== 订单进度页 ===== */
+.order-view { padding: 18px 14px calc(90px + env(safe-area-inset-bottom)); }
+.ocard { background: #fff; border-radius: 16px; padding: 20px 16px; margin-bottom: 12px; border: 1px solid #EFEDE9; }
+.ocard-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.ocard-head .ono { font-size: 12.5px; color: #8A94A6; }
+.status-big { font-size: 19px; font-weight: 800; text-align: center; margin: 4px 0 6px; }
+.status-sub { font-size: 13px; color: #8A94A6; text-align: center; }
+.steps { display: flex; margin: 18px 4px 6px; }
+.step { flex: 1; text-align: center; position: relative; }
+.step::before {
+  content: ''; position: absolute; top: 9px; left: -50%; width: 100%; height: 2px; background: #E7E5E0;
+}
+.step:first-child::before { display: none; }
+.step .dot {
+  width: 20px; height: 20px; border-radius: 50%; margin: 0 auto; background: #E7E5E0;
+  display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; position: relative; z-index: 1;
+}
+.step.done::before { background: #07C160; }
+.step.done .dot { background: #07C160; }
+.step.now .dot { background: #fff; border: 2.5px solid #07C160; }
+.step.now .dot::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #07C160; }
+.step .slabel { font-size: 11.5px; color: #8A94A6; margin-top: 5px; }
+.step.done .slabel, .step.now .slabel { color: #1F2329; font-weight: 600; }
+.oitem { display: flex; align-items: center; padding: 9px 0; border-bottom: 1px dashed #EFEDE9; }
+.oitem:last-child { border-bottom: none; }
+.oitem .oinfo { flex: 1; min-width: 0; }
+.oitem .oname { font-size: 14.5px; font-weight: 600; }
+.oitem .oopt { font-size: 11.5px; color: #8A94A6; margin-top: 2px; }
+.add-tag {
+  display: inline-block; font-size: 10.5px; color: #E85518; background: #FFF0E6;
+  padding: 1px 6px; border-radius: 4px; margin-right: 6px; vertical-align: 1px;
+}
+.ichip { font-size: 11px; padding: 3px 9px; border-radius: 999px; flex: none; }
+.ichip.wait { background: #FFF4E5; color: #B45309; }
+.ichip.done { background: #E8F8EE; color: #07C160; }
+.ichip.add { background: #EAF2FF; color: #2563EB; }
+.ofoot { display: flex; gap: 10px; margin-top: 14px; }
+.ofoot button {
+  flex: 1; border-radius: 999px; padding: 12px; font-size: 14.5px; font-weight: 700;
+  cursor: pointer; border: none; font-family: inherit;
+}
+.o-add { background: #E85518; color: #fff; }
+.o-cancel { background: #F2F0EC; color: #5A6472; }
+.o-again { background: #07C160; color: #fff; }
+.o-again:active, .o-add:active { opacity: .85; }
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed; top: calc(60px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
+  background: rgba(31,35,41,.88); color: #fff; font-size: 13.5px; border-radius: 10px;
+  padding: 10px 18px; z-index: 200; max-width: 80%; text-align: center; white-space: pre-line;
+}
+
+/* ===== 加载 ===== */
+.loading-tip { text-align: center; color: #8A94A6; font-size: 13px; padding: 60px 0; }
+.empty-tip { text-align: center; color: #8A94A6; font-size: 13.5px; padding: 24px 0; }
+</style>
+</head>
+<body>
+<div id="app" v-cloak>
+
+  <!-- 顶栏 -->
+  <div class="topbar">
+    <div class="back" v-if="view !== 'pick'" @click="goBack">‹</div>
+    <div class="shop">{{ shop.name || '扫码点餐' }}</div>
+    <div class="tchip add" v-if="table && addMode">加菜中 · {{ table.name }}</div>
+    <div class="tchip" v-else-if="table && view !== 'pick'">{{ table.name }}</div>
+    <div class="tchip" v-else-if="view === 'pick'">请选桌</div>
+  </div>
+
+  <!-- 选桌页 -->
+  <div class="pick-view" v-if="view === 'pick'">
+    <div class="scan-hint">
+      <span class="qricon">▣</span><b>微信「扫一扫」桌台二维码</b><br>
+      即可直接进入点餐；也可在下方手动选择您所在的桌台
+    </div>
+    <div class="pick-title">选择桌台（{{ tables.length }} 桌）</div>
+    <div class="loading-tip" v-if="loadingTables">正在加载桌台…</div>
+    <div class="empty-tip" v-else-if="!tables.length">暂无可用桌台，请联系服务员</div>
+    <div class="table-grid" v-else>
+      <div class="tcell" v-for="t in tables" :key="t.id" @click="pickTable(t)">
+        <div class="no">{{ t.name }}</div>
+        <div class="seats">{{ t.seats }}人桌</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 菜单页 -->
+  <div v-else-if="view === 'menu'">
+    <div class="notice" v-if="shop.notice">公告：{{ shop.notice }}</div>
+    <div class="catbar" v-if="cats.length">
+      <div class="cat" v-for="c in cats" :key="c.id"
+           :class="{ on: c.id === activeCat }" @click="tapCategory(c.id)">{{ c.name }}</div>
+    </div>
+    <div class="loading-tip" v-if="loadingMenu">正在加载菜单…</div>
+    <div class="dish-list" v-else>
+      <div class="sec" v-for="c in cats" :key="c.id" :id="'sec-' + c.id">
+        <div class="sec-title">{{ c.name }}</div>
+        <div class="dish" v-for="d in c.dishes" :key="d.id">
+          <img class="dimg" v-if="d.image" :src="d.image" @load="imgLoaded">
+          <div class="dinfo">
+            <div class="dname">{{ d.name }}
+              <span class="badge sign" v-if="isSign(c)">招牌</span>
+              <span class="badge hot" v-if="isSpicy(d)">辣</span>
+            </div>
+            <div class="ddesc" v-if="d.description">{{ d.description }}</div>
+            <div class="drow">
+              <div class="dprice"><span class="yen">¥</span>{{ d.price.toFixed(2) }}</div>
+              <div class="stepper" v-if="qtyOf(d) > 0">
+                <div class="step-btn sub" @click="dishSub(d)">−</div>
+                <div class="step-num">{{ qtyOf(d) }}</div>
+                <div class="step-btn" @click="dishPlus(d)">＋</div>
+              </div>
+              <div class="addbtn" v-else @click="dishAdd(d)">＋</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 订单进度页 -->
+  <div class="order-view" v-else-if="view === 'order'">
+    <div class="loading-tip" v-if="loadingOrder">正在加载订单…</div>
+    <template v-else-if="order">
+      <div class="ocard">
+        <div class="ocard-head">
+          <span class="ono">单号 {{ order.order_no }}</span>
+          <span class="ono">{{ order.table_name }} · {{ order.created_at }}</span>
+        </div>
+        <div class="status-big">{{ statusCard.title }}</div>
+        <div class="status-sub">{{ statusCard.sub }}</div>
+        <div class="steps">
+          <div class="step" v-for="s in steps" :key="s.key"
+               :class="{ done: s.done, now: s.now }">
+            <div class="dot">{{ s.done ? '✓' : '' }}</div>
+            <div class="slabel">{{ s.label }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="ocard">
+        <div class="oitem" v-for="it in orderItems" :key="it.id">
+          <div class="oinfo">
+            <div class="oname"><span class="add-tag" v-if="it.is_add">加</span>{{ it.name }} ×{{ it.qty }}</div>
+            <div class="oopt" v-if="it.optionsText">{{ it.optionsText }}</div>
+          </div>
+          <div class="ichip" :class="it.statusCls">{{ it.statusText }}</div>
+        </div>
+        <div class="summary" style="margin-top:14px">
+          <div class="sumrow"><span>菜品合计</span><span>¥{{ order.total_amount.toFixed(2) }}</span></div>
+          <div class="sumrow"><span>{{ order.fee_label }}（{{ order.people }}人）</span><span>¥{{ (order.utensil_fee || 0).toFixed(2) }}</span></div>
+          <div class="sumrow grand"><span>合计</span><span class="v">¥{{ order.receivable.toFixed(2) }}</span></div>
+        </div>
+      </div>
+      <div class="ofoot" v-if="!isTerminal">
+        <button class="o-add" @click="goAdd">＋ 加菜</button>
+        <button class="o-cancel" @click="askCancel">取消订单</button>
+      </div>
+      <div class="ofoot" v-else>
+        <button class="o-again" @click="orderAgain">{{ order.status === 'cancelled' ? '重新点餐' : '再来一单' }}</button>
+      </div>
+    </template>
+  </div>
+
+  <!-- 底部购物车栏（菜单页） -->
+  <div class="cartbar" v-if="view === 'menu' && cartCount > 0">
+    <div class="carticon" :class="{ gray: !cartCount }" @click="cartOpen = true">
+      🛒<div class="cnt" v-if="cartCount">{{ cartCount }}</div>
+    </div>
+    <div class="cartinfo" @click="cartOpen = true">
+      <div class="total"><span class="yen">¥</span>{{ grandTotal.toFixed(2) }}</div>
+      <div class="sub" v-if="addMode">加菜合计 ¥{{ dishTotal.toFixed(2) }}（不含餐具费）</div>
+      <div class="sub" v-else>菜品 ¥{{ dishTotal.toFixed(2) }} + 餐具费 ¥{{ utensilFee.toFixed(2) }}（{{ people }}人）</div>
+    </div>
+    <div class="submit-btn" :class="{ addmode: addMode }" @click="onBarAction">
+      {{ addMode ? '提交加菜' : '去下单' }}
+    </div>
+  </div>
+
+  <!-- 购物车弹层 -->
+  <div class="mask" v-if="cartOpen" @click.self="cartOpen = false">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="t">已选菜品（{{ cartCount }} 份）</div>
+        <div class="clear" @click="clearCart">清空</div>
+      </div>
+      <div class="sheet-body">
+        <div class="citem" v-for="it in cartList" :key="it.key">
+          <div class="cname">
+            {{ it.name }}
+            <div class="copts" v-if="it.optionsText">{{ it.optionsText }}</div>
+          </div>
+          <div class="cprice">¥{{ it.subtotal.toFixed(2) }}</div>
+          <div class="stepper">
+            <div class="step-btn sub" @click="cartSub(it.key)">−</div>
+            <div class="step-num">{{ it.qty }}</div>
+            <div class="step-btn" @click="cartPlus(it.key)">＋</div>
+          </div>
+        </div>
+
+        <div class="optrow" v-if="!addMode">
+          <div class="olabel">用餐人数<small>餐具费按人数收取，1 元/人</small></div>
+          <div class="stepper">
+            <div class="step-btn sub" @click="people = Math.max(1, people - 1); syncUtensils()">−</div>
+            <div class="step-num">{{ people }}</div>
+            <div class="step-btn" @click="people = Math.min(20, people + 1); syncUtensils()">＋</div>
+          </div>
+        </div>
+        <div class="optrow" v-if="!addMode">
+          <div class="olabel">餐具数量<small>默认跟随人数，可增减</small></div>
+          <div class="stepper">
+            <div class="step-btn sub" @click="utensils = Math.max(0, utensils - 1)">−</div>
+            <div class="step-num">{{ utensils }}</div>
+            <div class="step-btn" @click="utensils = Math.min(30, utensils + 1)">＋</div>
+          </div>
+        </div>
+
+        <textarea class="remark-input" rows="2" maxlength="100" v-if="!addMode"
+                  placeholder="备注：忌口、口味要求等（选填）" v-model="remark"></textarea>
+
+        <div class="summary">
+          <div class="sumrow"><span>菜品合计</span><span>¥{{ dishTotal.toFixed(2) }}</span></div>
+          <div class="sumrow" v-if="!addMode"><span>餐具费（{{ people }}人 × 1元）</span><span>¥{{ utensilFee.toFixed(2) }}</span></div>
+          <div class="sumrow grand"><span>{{ addMode ? '加菜合计' : '合计' }}</span><span class="v">¥{{ grandTotal.toFixed(2) }}</span></div>
+        </div>
+
+        <button class="pay-btn" :disabled="submitting || !cartCount" @click="submitOrder">
+          {{ submitting ? '提交中…' : (addMode ? '提交加菜（需服务员确认）' : '提交订单（需服务员确认）') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 规格弹层 -->
+  <div class="mask center" v-if="specShow" @click.self="specShow = false">
+    <div class="spec-card">
+      <div class="sname">{{ specDish && specDish.name }}</div>
+      <div class="sprice">¥{{ specDish && specDish.price.toFixed(2) }}</div>
+      <div class="spec-group" v-for="g in specGroups" :key="g.label">
+        <div class="glabel">{{ g.label }}</div>
+        <div class="spec-vals">
+          <div class="spec-val" v-for="v in g.values" :key="v.label"
+               :class="{ on: v.selected }" @click="tapSpecVal(g.label, v.label)">{{ v.label }}</div>
+        </div>
+      </div>
+      <div class="spec-foot">
+        <div class="stepper">
+          <div class="step-btn sub" @click="specQty = Math.max(1, specQty - 1)">−</div>
+          <div class="step-num">{{ specQty }}</div>
+          <div class="step-btn" @click="specQty = Math.min(99, specQty + 1)">＋</div>
+        </div>
+        <button class="spec-ok" @click="confirmSpec">加入购物车</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 确认弹层 -->
+  <div class="mask center" v-if="cfmBox" @click.self="cfmBox = null">
+    <div class="cfm-card">
+      <div class="m">{{ cfmBox.msg }}</div>
+      <div class="cfm-btns">
+        <button class="cfm-no" @click="cfmBox = null">再想想</button>
+        <button class="cfm-ok" @click="cfmOk">{{ cfmBox.okText || '确定' }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" v-if="toastMsg">{{ toastMsg }}</div>
+
+</div>
+
+<script>
+(function () {
+  const { createApp } = Vue;
+  const API = ''; // 同源部署（Nginx /api/ 反代）
+
+  const SPICY = ['辣', '麻', '水煮', '香辣', '酸辣'];
+  const ITEM_STATUS = {
+    pending: { text: '待出餐', cls: 'wait' },
+    out: { text: '已出餐', cls: 'done' },
+    add_pending: { text: '加菜待确认', cls: 'add' },
+  };
+
+  createApp({
+    data() {
+      return {
+        view: 'pick',            // pick | menu | order
+        shop: { name: '', notice: '' },
+        tables: [],
+        loadingTables: false,
+        table: null,
+        cats: [],
+        loadingMenu: false,
+        activeCat: '',
+        // 购物车：key -> { dishId, name, price, options, qty }
+        cartItems: {},
+        cartOpen: false,
+        remark: '',
+        people: 2,
+        utensils: 2,
+        addMode: false,
+        orderId: 0,
+        order: null,
+        steps: [],
+        statusCard: { title: '', sub: '' },
+        loadingOrder: false,
+        submitting: false,
+        // 规格弹层
+        specShow: false,
+        specDish: null,
+        specGroups: [],
+        specSelected: {},
+        specQty: 1,
+        // 提示
+        toastMsg: '',
+        toastTimer: null,
+        cfmBox: null,
+        // 轮询/WS
+        pollTimer: null,
+        ws: null,
+        wsTimer: null,
+      };
+    },
+
+    computed: {
+      cartList() {
+        return Object.keys(this.cartItems).map((k) => {
+          const it = this.cartItems[k];
+          return {
+            key: k,
+            dishId: it.dishId, name: it.name, price: it.price,
+            options: it.options, qty: it.qty,
+            subtotal: it.price * it.qty,
+            optionsText: Object.keys(it.options || {}).map((x) => it.options[x]).join(' / '),
+          };
+        });
+      },
+      cartCount() {
+        return this.cartList.reduce((s, it) => s + it.qty, 0);
+      },
+      dishTotal() {
+        return this.cartList.reduce((s, it) => s + it.subtotal, 0);
+      },
+      utensilFee() {
+        return this.people; // 餐具费 = 人数 × 1 元
+      },
+      grandTotal() {
+        // 加菜只加菜品金额，不含餐具费
+        return this.dishTotal + (this.addMode ? 0 : this.utensilFee);
+      },
+      orderItems() {
+        return (this.order && this.order.items || []).map((it) => ({
+          ...it,
+          statusText: (ITEM_STATUS[it.status] || {}).text || it.status,
+          statusCls: (ITEM_STATUS[it.status] || {}).cls || '',
+          optionsText: Object.keys(it.options || {}).map((k) => it.options[k]).join(' / '),
+        }));
+      },
+      isTerminal() {
+        return this.order && ['paid', 'cancelled'].indexOf(this.order.status) >= 0;
+      },
+    },
+
+    created() {
+      this.loadShop();          // 顶栏店名
+      this.silentLogin();       // 静默登录（mock），带 token 更完整
+      this.resolveUrl();        // ?table=A01 / ?scene=A01
+      this.restoreOrder();      // 回到进行中的订单
+      // 分类高亮：监听页面滚动（节流）
+      this._scrollHandler = () => {
+        clearTimeout(this._scrollTimer);
+        this._scrollTimer = setTimeout(() => this.onScroll(), 80);
+      };
+      window.addEventListener('scroll', this._scrollHandler, { passive: true });
+    },
+
+    beforeUnmount() {
+      this.stopWatch();
+      window.removeEventListener('scroll', this._scrollHandler);
+    },
+
+    methods: {
+      // ---------- 基础 ----------
+      async api(path, opts) {
+        opts = opts || {};
+        const headers = { 'Content-Type': 'application/json' };
+        const token = localStorage.getItem('h5_token');
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+        const res = await fetch(API + path, {
+          method: opts.method || 'GET',
+          headers,
+          body: opts.data ? JSON.stringify(opts.data) : undefined,
+        });
+        if (!res.ok) {
+          let msg = '请求失败，请稍后重试';
+          try { const j = await res.json(); msg = j.detail || j.message || msg; } catch (e) {}
+          throw new Error(msg);
+        }
+        return res.json();
+      },
+
+      toast(msg) {
+        this.toastMsg = msg;
+        clearTimeout(this.toastTimer);
+        this.toastTimer = setTimeout(() => { this.toastMsg = ''; }, 2600);
+      },
+
+      confirm(msg, onOk, okText) {
+        this.cfmBox = { msg, okText: okText || '确定', onOk };
+      },
+      cfmOk() {
+        const fn = this.cfmBox && this.cfmBox.onOk;
+        this.cfmBox = null;
+        if (fn) fn();
+      },
+
+      silentLogin() {
+        try {
+          fetch(API + '/api/customer/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: 'h5_' + Date.now() + '_' + Math.floor(Math.random() * 1e6) }),
+          }).then((r) => r.json()).then((j) => {
+            if (j && j.token) localStorage.setItem('h5_token', j.token);
+          }).catch(() => {});
+        } catch (e) {}
+      },
+
+      loadShop() {
+        this.api('/api/customer/menu').then((data) => {
+          this.shop = data.shop || { name: '', notice: '' };
+        }).catch(() => {});
+      },
+
+      // ---------- 桌台 ----------
+      resolveUrl() {
+        const q = new URLSearchParams(location.search);
+        const scene = (q.get('table') || q.get('scene') || '').trim();
+        if (!scene) {
+          this.loadTables();
+          return;
+        }
+        this.resolveScene(scene, true);
+      },
+
+      resolveScene(scene, fromUrl) {
+        this.api('/api/customer/tables/by-scene/' + encodeURIComponent(scene))
+          .then((t) => {
+            this.table = t;
+            this.loadTables(); // 兜底列表也备好
+            this.loadMenu();
+            this.view = 'menu';
+          })
+          .catch((e) => {
+            this.toast((e.message || '桌台码无效') + '\n请在下方手动选择桌台');
+            this.loadTables();
+          });
+      },
+
+      loadTables() {
+        this.loadingTables = true;
+        this.api('/api/customer/tables')
+          .then((t) => { this.tables = t || []; })
+          .catch(() => { this.tables = []; })
+          .finally(() => { this.loadingTables = false; });
+      },
+
+      pickTable(t) {
+        if (this.cartCount > 0 && this.table && this.table.id !== t.id) {
+          this.confirm('切换桌台会保留已选菜品\n确定进入 ' + t.name + ' 桌吗？', () => this.enterTable(t));
+        } else {
+          this.enterTable(t);
+        }
+      },
+
+      enterTable(t) {
+        this.api('/api/customer/tables/by-scene/' + encodeURIComponent(t.name))
+          .then((info) => {
+            this.table = info;
+            this.loadMenu();
+            this.view = 'menu';
+          })
+          .catch((e) => this.toast(e.message || '桌台不可用'));
+      },
+
+      // ---------- 菜单 ----------
+      loadMenu() {
+        this.loadingMenu = true;
+        this.api('/api/customer/menu')
+          .then((data) => {
+            this.shop = data.shop || this.shop;
+            this.cats = (data.categories || []).map((c) => ({
+              id: c.id, name: c.name,
+              dishes: c.dishes.map((d) => ({
+                ...d,
+                price: Number(d.price),
+                image: d.image && d.image.indexOf('http') !== 0 ? d.image : (d.image || ''),
+              })),
+            }));
+            if (this.cats.length && !this.activeCat) this.activeCat = this.cats[0].id;
+          })
+          .catch((e) => this.toast(e.message))
+          .finally(() => { this.loadingMenu = false; });
+      },
+
+      isSign(c) { return c.name === '本店特色'; },
+      isSpicy(d) { return SPICY.some((s) => d.name.indexOf(s) >= 0); },
+
+      qtyOf(d) {
+        return this.cartList
+          .filter((it) => it.dishId === d.id)
+          .reduce((s, it) => s + it.qty, 0);
+      },
+
+      cartKey(dishId, options) {
+        const opts = options || {};
+        const parts = Object.keys(opts).sort().map((k) => k + '=' + opts[k]);
+        return dishId + '::' + (parts.length ? parts.join('|') : '');
+      },
+
+      dishAdd(d) {
+        if (d.option_template && Object.keys(d.option_template).length) {
+          this.openSpec(d);
+        } else {
+          this.addToCart({ id: d.id, name: d.name, price: d.price }, 1, {});
+        }
+      },
+
+      dishSub(d) {
+        // 数量减一：从该菜品的任意一个组合开始减
+        const key = this.cartList.filter((it) => it.dishId === d.id)
+          .map((it) => it.key).sort()[0];
+        if (key) this.cartSub(key);
+      },
+
+      dishPlus(d) {
+        if (d.option_template && Object.keys(d.option_template).length) {
+          this.openSpec(d);
+        } else {
+          this.addToCart({ id: d.id, name: d.name, price: d.price }, 1, {});
+        }
+      },
+
+      openSpec(d) {
+        const groups = Object.keys(d.option_template).map((label) => ({
+          label,
+          values: d.option_template[label].map((v, i) => ({ label: v, selected: i === 0 })),
+        }));
+        const sel = {};
+        groups.forEach((g) => { sel[g.label] = g.values[0].label; });
+        this.specDish = d;
+        this.specGroups = groups;
+        this.specSelected = sel;
+        this.specQty = 1;
+        this.specShow = true;
+      },
+
+      tapSpecVal(label, value) {
+        this.specSelected = { ...this.specSelected, [label]: value };
+        this.specGroups = this.specGroups.map((g) => ({
+          ...g,
+          values: g.values.map((v) => ({ ...v, selected: g.label === label ? v.label === value : v.selected })),
+        }));
+      },
+
+      confirmSpec() {
+        this.addToCart(
+          { id: this.specDish.id, name: this.specDish.name, price: this.specDish.price },
+          this.specQty,
+          this.specSelected
+        );
+        this.specShow = false;
+        this.toast('已加入购物车');
+      },
+
+      addToCart(dish, qty, options) {
+        const key = this.cartKey(dish.id, options);
+        const cur = this.cartItems[key] || {
+          dishId: dish.id, name: dish.name, price: dish.price, options: options || {}, qty: 0,
+        };
+        cur.qty += qty;
+        this.cartItems = { ...this.cartItems, [key]: cur };
+        this.persistCart();
+      },
+
+      cartSub(key) {
+        const it = this.cartItems[key];
+        if (!it) return;
+        it.qty -= 1;
+        if (it.qty <= 0) {
+          const next = { ...this.cartItems };
+          delete next[key];
+          this.cartItems = next;
+        } else {
+          this.cartItems = { ...this.cartItems, [key]: it };
+        }
+        this.persistCart();
+      },
+
+      cartPlus(key) {
+        const it = this.cartItems[key];
+        if (!it) return;
+        it.qty = Math.min(99, it.qty + 1);
+        this.cartItems = { ...this.cartItems, [key]: it };
+        this.persistCart();
+      },
+
+      clearCart() {
+        this.cartItems = {};
+        this.persistCart();
+        this.cartOpen = false;
+      },
+
+      persistCart() {
+        try { localStorage.setItem('h5_cart', JSON.stringify(this.cartItems)); } catch (e) {}
+      },
+      restoreCart() {
+        try {
+          const raw = localStorage.getItem('h5_cart');
+          if (raw) this.cartItems = JSON.parse(raw) || {};
+        } catch (e) {}
+      },
+
+      syncUtensils() {
+        this.utensils = this.people; // 餐具默认跟随人数
+      },
+
+      // ---------- 分类滚动 ----------
+      tapCategory(id) {
+        this.activeCat = id;
+        const el = document.getElementById('sec-' + id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      },
+
+      onScroll() {
+        const cats = this.cats;
+        if (!cats.length || this.view !== 'menu') return;
+        let current = cats[0].id;
+        cats.forEach((c) => {
+          const el = document.getElementById('sec-' + c.id);
+          if (el && el.getBoundingClientRect().top <= 110) current = c.id;
+        });
+        if (current !== this.activeCat) this.activeCat = current;
+      },
+
+      imgLoaded() {
+        // 图片加载会改变分区高度，仅需下次滚动时自然校正
+      },
+
+      // ---------- 底部栏 ----------
+      onBarAction() {
+        if (this.cartCount === 0) {
+          this.toast('请先选择菜品');
+          return;
+        }
+        if (this.addMode) {
+          this.submitAdd();
+        } else {
+          this.cartOpen = true;
+        }
+      },
+
+      // ---------- 下单 ----------
+      submitOrder() {
+        if (this.submitting) return;
+        if (!this.table) {
+          this.toast('未识别桌台，请重新扫码或选择桌台');
+          return;
+        }
+        if (this.cartCount === 0) {
+          this.toast('购物车是空的');
+          return;
+        }
+        this.submitting = true;
+        this.api('/api/customer/orders', {
+          method: 'POST',
+          data: {
+            table_id: this.table.id,
+            items: this.cartList.map((it) => ({
+              dish_id: it.dishId,
+              qty: it.qty,
+              options: Object.keys(it.options || {}).length ? it.options : null,
+            })),
+            remark: this.remark,
+            people: this.people,
+            utensils: this.utensils,
+          },
+        }).then((data) => {
+          this.submitting = false;
+          this.cartOpen = false;
+          this.cartItems = {};
+          this.persistCart();
+          this.remark = '';
+          this.applyOrder(data);
+          this.view = 'order';
+          this.startWatch();
+        }).catch((e) => {
+          this.submitting = false;
+          this.toast(e.message);
+        });
+      },
+
+      submitAdd() {
+        if (this.submitting) return;
+        if (!this.orderId) {
+          this.toast('订单已结束');
+          return;
+        }
+        this.submitting = true;
+        this.api('/api/customer/orders/' + this.orderId + '/add', {
+          method: 'POST',
+          data: {
+            items: this.cartList.map((it) => ({
+              dish_id: it.dishId,
+              qty: it.qty,
+              options: Object.keys(it.options || {}).length ? it.options : null,
+            })),
+          },
+        }).then((data) => {
+          this.submitting = false;
+          this.cartItems = {};
+          this.persistCart();
+          this.addMode = false;
+          this.applyOrder(data);
+          this.view = 'order';
+          this.toast('加菜已提交，等待服务员确认');
+        }).catch((e) => {
+          this.submitting = false;
+          this.toast(e.message);
+        });
+      },
+
+      // ---------- 订单进度 ----------
+      applyOrder(data) {
+        this.order = data;
+        this.orderId = data.id;
+        this.steps = data.steps || [];
+        this.statusCard = data.status_card || { title: '', sub: '' };
+        try {
+          localStorage.setItem('h5_order', JSON.stringify({
+            id: data.id, table_id: data.table_id, table_name: data.table_name,
+          }));
+        } catch (e) {}
+      },
+
+      restoreOrder() {
+        this.restoreCart();
+        let saved = null;
+        try { saved = JSON.parse(localStorage.getItem('h5_order') || 'null'); } catch (e) {}
+        if (!saved || !saved.id) return;
+        this.api('/api/customer/orders/' + saved.id)
+          .then((data) => {
+            this.applyOrder(data);
+            this.table = { id: data.table_id, name: data.table_name };
+            if (['paid', 'cancelled'].indexOf(data.status) < 0) {
+              this.view = 'order';
+              this.startWatch();
+            } else {
+              try { localStorage.removeItem('h5_order'); } catch (e) {}
+            }
+          })
+          .catch(() => {
+            try { localStorage.removeItem('h5_order'); } catch (e) {}
+          });
+      },
+
+      startWatch() {
+        this.stopWatch();
+        this.pollTimer = setInterval(() => {
+          if (this.view !== 'order' || !this.orderId) return;
+          if (this.isTerminal) { this.stopWatch(); return; }
+          this.refreshOrder();
+        }, 6000);
+        this.connectWs();
+      },
+
+      stopWatch() {
+        if (this.pollTimer) { clearInterval(this.pollTimer); this.pollTimer = null; }
+        if (this.ws) { try { this.ws.onclose = null; this.ws.close(); } catch (e) {} this.ws = null; }
+        if (this.wsTimer) { clearTimeout(this.wsTimer); this.wsTimer = null; }
+      },
+
+      connectWs() {
+        if (!this.orderId || this.isTerminal) return;
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+        let ws = null;
+        try {
+          ws = new WebSocket(proto + '://' + location.host + '/ws/order:' + this.orderId);
+        } catch (e) { return; }
+        this.ws = ws;
+        ws.onmessage = (ev) => {
+          try {
+            const data = JSON.parse(ev.data);
+            if (data.type === 'status' && data.order) this.applyOrder(data.order);
+          } catch (e) {}
+        };
+        ws.onclose = () => {
+          if (this.ws === ws) this.ws = null;
+          if (this.orderId && !this.isTerminal) {
+            this.wsTimer = setTimeout(() => this.connectWs(), 3000);
+          }
+        };
+        ws.onerror = () => {};
+      },
+
+      refreshOrder() {
+        if (!this.orderId) return;
+        this.api('/api/customer/orders/' + this.orderId)
+          .then((data) => this.applyOrder(data))
+          .catch(() => {});
+      },
+
+      goAdd() {
+        if (this.isTerminal) {
+          this.toast('订单已结束，无法加菜');
+          return;
+        }
+        this.addMode = true;
+        this.view = 'menu';
+        if (!this.cats.length) this.loadMenu();
+      },
+
+      askCancel() {
+        if (this.isTerminal) return;
+        this.confirm('确定取消本次订单吗？', () => {
+          this.api('/api/customer/orders/' + this.orderId + '/cancel', {
+            method: 'POST',
+            data: { reason: '顾客取消' },
+          }).then((data) => {
+            this.applyOrder(data);
+            this.stopWatch();
+            this.toast('订单已取消');
+          }).catch((e) => this.toast(e.message));
+        }, '确定取消');
+      },
+
+      orderAgain() {
+        try { localStorage.removeItem('h5_order'); } catch (e) {}
+        this.order = null;
+        this.orderId = 0;
+        this.addMode = false;
+        this.stopWatch();
+        this.view = this.table ? 'menu' : 'pick';
+        if (!this.cats.length && this.table) this.loadMenu();
+      },
+
+      goBack() {
+        if (this.view === 'order') {
+          this.addMode = false;
+          this.view = 'menu';
+          if (!this.cats.length) this.loadMenu();
+        } else if (this.view === 'menu') {
+          if (this.addMode) {
+            // 加菜中返回订单页
+            this.addMode = false;
+            this.view = 'order';
+          } else {
+            this.view = 'pick';
+            if (!this.tables.length) this.loadTables();
+          }
+        }
+      },
+    },
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

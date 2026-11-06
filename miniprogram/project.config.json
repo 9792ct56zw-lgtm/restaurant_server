@@ -1,0 +1,49 @@
+{
+  "description": "餐厅扫码点餐小程序（顾客端）",
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "compileType": "miniprogram",
+  "libVersion": "2.33.0",
+  "appid": "wx2abcc373694a66db",
+  "projectname": "restaurant-miniprogram",
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "扫码进入 A01 桌",
+          "pathName": "pages/menu/menu",
+          "query": "scene=A01",
+          "launchMode": "default",
+          "scene": 1047
+        }
+      ]
+    }
+  },
+  "simulatorPluginLibVersion": {},
+  "editorSetting": {}
+}

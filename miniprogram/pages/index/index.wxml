@@ -1,0 +1,31 @@
+<view class="page">
+  <view class="hero">
+    <view class="logo">🍜</view>
+    <view class="shop-name">{{shopName}}</view>
+    <view class="slogan">堂食扫码点餐 · 请至收银台结账</view>
+  </view>
+
+  <view class="scan-zone">
+    <button class="scan-btn" bindtap="onScan">
+      <view class="scan-ico">📷</view>
+      <view class="scan-title">扫一扫 开始点餐</view>
+      <view class="scan-sub">扫描桌上二维码，自动识别桌号</view>
+    </button>
+  </view>
+
+  <view class="dev-zone" wx:if="{{loading || tables.length}}">
+    <view class="dev-title">开发调试 · 手动选择桌台</view>
+    <view class="dev-sub" wx:if="{{loading}}">桌台加载中…</view>
+    <view class="tbl-grid" wx:else>
+      <view
+        wx:for="{{tables}}" wx:key="id"
+        class="tbl {{item.area === '包间' ? 'box' : ''}}"
+        data-id="{{item.id}}" data-name="{{item.name}}"
+        bindtap="onPickTable"
+      >
+        <view class="tbl-no">{{item.name}}</view>
+        <view class="tbl-area">{{item.area}} · {{item.seats}}人</view>
+      </view>
+    </view>
+  </view>
+</view>

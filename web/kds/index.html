@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>后厨大屏 KDS · 餐厅掌柜</title>
+<script src="../vendor/vue.global.prod.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:#0B0C10; }
+[v-cloak] { display:none; }
+
+/* 主题变量 */
+.kds { --bg:#16181D; --panel:#1E2128; --panel2:#262A33; --ink:#F2F3F5; --sub:#8B93A3; --accent:#FF6A2B; --line:#313640; }
+.kds.t-green { --bg:#0E1712; --panel:#14211B; --panel2:#1B2C23; --ink:#EAF5EE; --sub:#7E9688; --accent:#2FBF71; --line:#243B2F; }
+.kds.t-blue { --bg:#0D1526; --panel:#141E36; --panel2:#1B2745; --ink:#E8EEFB; --sub:#7E8BA8; --accent:#3D6FE0; --line:#26344F; }
+.kds.t-brown { --bg:#1A1108; --panel:#251A0D; --panel2:#32230F; --ink:#F8EFE0; --sub:#A08B6B; --accent:#F59E0B; --line:#40301A; }
+
+/* 登录 */
+.login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; background:#0B0C10; }
+.login-card { background:#1E2128; border-radius:16px; padding:34px 28px; width:100%; max-width:340px; }
+.login-card h1 { color:#fff; font-size:20px; text-align:center; }
+.login-card .sub { color:#8B93A3; font-size:12.5px; text-align:center; margin:6px 0 22px; }
+.login-card input { width:100%; border:1.5px solid #313640; background:#262A33; color:#fff; border-radius:10px; padding:12px 14px; font-size:15px; margin-bottom:12px; outline:none; }
+.login-card .err { color:#FF6A2B; font-size:13px; margin-bottom:8px; min-height:16px; }
+.login-card button { width:100%; border:none; border-radius:10px; background:#FF6A2B; color:#fff; font-size:16px; font-weight:700; padding:13px; cursor:pointer; }
+
+.kds { min-height:100vh; background:var(--bg); color:var(--ink); display:flex; flex-direction:column; }
+
+/* 顶栏 */
+.kds-top { display:flex; align-items:center; gap:10px; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--line); flex-wrap:wrap; }
+.kt { font-size:20px; font-weight:800; color:var(--accent); }
+.kchip { font-size:12px; color:var(--sub); border:1px solid var(--line); border-radius:999px; padding:4px 12px; white-space:nowrap; }
+.kchip.on { color:var(--accent); border-color:var(--accent); }
+.tdot { display:inline-block; width:14px; height:14px; border-radius:50%; margin-left:5px; vertical-align:-2px; border:2px solid transparent; cursor:pointer; }
+.tdot.on { border-color:#fff; }
+.clock { margin-left:auto; font-size:20px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--ink); }
+.new-badge { background:var(--accent); color:#fff; font-size:12.5px; font-weight:800; border-radius:999px; padding:5px 14px; }
+
+/* 双页签 + 已出餐跳转 */
+.page-tabs { display:flex; gap:6px; background:var(--panel2); border-radius:999px; padding:4px; }
+.ptab { font-size:14.5px; font-weight:800; color:var(--sub); border:none; background:transparent; border-radius:999px; padding:7px 20px; cursor:pointer; }
+.ptab.on { background:var(--accent); color:#fff; }
+.done-link { font-size:13px; font-weight:800; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:7px 16px; cursor:pointer; text-decoration:none; }
+.done-link .dn { background:var(--accent); color:#fff; border-radius:999px; padding:0 8px; margin-left:6px; }
+
+/* 两栏 */
+.kds-cols { flex:1; display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:14px; align-items:start; }
+.kds-col { background:var(--panel); border-radius:14px; padding:12px; min-height:200px; border:1px solid var(--line); }
+.kds-col-head { font-size:16px; font-weight:800; padding:2px 4px 12px; display:flex; align-items:center; gap:8px; }
+.kds-col-head::before { content:''; width:9px; height:9px; border-radius:50%; background:var(--accent); }
+.kds-col-head .n { margin-left:auto; background:var(--panel2); border-radius:999px; font-size:12.5px; padding:3px 11px; color:var(--sub); }
+
+.kds-card { background:var(--panel2); border:1.5px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px; }
+.kds-card.urgent { border-color:var(--accent); animation:blink 1.2s infinite; }
+.kds-card.urged { border-color:#E5484D; }
+@keyframes blink { 0%,100% { box-shadow:0 0 0 0 rgba(255,106,43,.0); } 50% { box-shadow:0 0 14px 2px rgba(255,106,43,.35); } }
+.kc-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:8px; }
+.table-no { font-size:24px; font-weight:900; color:var(--accent); line-height:1; }
+.t-info { text-align:right; }
+.t-info .t { font-size:12px; color:var(--sub); }
+.t-info .tm { font-size:12.5px; font-weight:700; color:var(--ink); }
+.t-info .tm.late { color:#FF7A7A; }
+.urge-tag { display:inline-block; background:#E5484D; color:#fff; font-size:11px; font-weight:800; border-radius:6px; padding:2px 8px; margin-left:6px; animation:blink 1s infinite; }
+.kds-card ul { list-style:none; }
+.kds-card li { display:flex; justify-content:space-between; align-items:center; padding:8px 6px; border-bottom:1px dashed var(--line); font-size:15px; }
+.kds-card li:last-child { border-bottom:none; }
+.kds-card li .opt { font-size:12px; color:#F5C044; margin-left:6px; }
+.kds-card li .add-tag { display:inline-block; background:#FF6A2B; color:#fff; font-size:10px; font-weight:800; border-radius:5px; padding:1px 6px; margin-left:5px; vertical-align:1px; }
+.li-right { display:flex; align-items:center; gap:10px; }
+.li-right .q { color:var(--sub); font-size:14px; }
+.kc-out { border:none; background:var(--accent); color:#fff; font-size:13px; font-weight:800; border-radius:8px; padding:7px 16px; cursor:pointer; }
+.kc-out.done { background:transparent; border:1px solid var(--line); color:var(--sub); cursor:default; }
+.kds-card li.out .li-left { opacity:.45; text-decoration:line-through; }
+.kds-card .remark { margin-top:8px; font-size:12.5px; color:#F5C044; background:rgba(245,192,68,.1); border-radius:8px; padding:6px 10px; }
+.kds-card .add-hint { margin-top:8px; font-size:12px; font-weight:700; color:#FF9B5C; background:rgba(255,155,92,.12); border:1px dashed rgba(255,155,92,.5); border-radius:8px; padding:5px 10px; }
+.kds-card.add-card { border:2px solid #FF9B5C; background:linear-gradient(180deg, rgba(255,155,92,.10), var(--panel2)); }
+.kds-card.add-card.urged { border-color:#E5484D; }
+.add-card-tag { display:inline-block; background:#FF9B5C; color:#fff; font-size:11px; font-weight:800; border-radius:6px; padding:3px 10px; margin-bottom:8px; }
+.empty { text-align:center; color:var(--sub); font-size:13px; padding:26px 0; }
+.c-done .kds-card { opacity:.75; }
+.done-col { border-style:dashed; }
+
+.toast { position:fixed; top:16px; left:50%; transform:translateX(-50%); background:var(--panel2); border:1px solid var(--accent); color:var(--ink); font-size:14px; border-radius:10px; padding:10px 22px; z-index:99; }
+</style>
+</head>
+<body>
+<div id="app" v-cloak>
+  <div class="login-wrap" v-if="!token">
+    <div class="login-card">
+      <h1>后厨大屏 KDS</h1>
+      <div class="sub">仅显示已确认订单 · 逐道出餐</div>
+      <input v-model="loginForm.username" placeholder="账号" @keyup.enter="doLogin">
+      <input v-model="loginForm.password" type="password" placeholder="密码" @keyup.enter="doLogin">
+      <div class="err">{{ loginErr }}</div>
+      <button @click="doLogin">进入后厨大屏</button>
+    </div>
+  </div>
+
+  <div class="kds" v-else :class="themeCls">
+    <div class="kds-top">
+      <span class="kt">后厨大屏 KDS</span>
+      <div class="page-tabs">
+        <button class="ptab" :class="{on: page==='dishes'}" @click="page='dishes'">🍲 餐品</button>
+        <button class="ptab" :class="{on: page==='staple'}" @click="page='staple'">🍚 主食</button>
+      </div>
+      <a class="done-link" href="done.html">已出餐<span class="dn">{{ cols.done.length }}</span> →</a>
+      <span class="kchip" :class="{on: speech}" @click="speech=!speech">● 语音播报：{{ speech ? '开' : '关' }}</span>
+      <span class="kchip">配色
+        <span v-for="t in themes" :key="t.cls" class="tdot" :class="{on: theme===t.cls}"
+          :style="{background: t.color}" :title="t.name" @click="theme=t.cls"></span>
+      </span>
+      <span class="kchip" style="cursor:pointer" @click="goFull">全屏</span>
+      <span class="clock">{{ clock }}</span>
+      <span class="new-badge">{{ page==='staple' ? '主食' : '餐品' }} · 待处理 {{ pendingTotal }} 单</span>
+    </div>
+
+    <div class="kds-cols">
+      <!-- 待出餐 -->
+      <div class="kds-col c-new">
+        <div class="kds-col-head">待出餐<span class="n">{{ pageNew.length }}</span></div>
+        <template v-for="o in pageNew" :key="o.is_add_card ? 'add-' + o.id : o.id">
+          <!-- 加菜独立卡：同桌号单独出现在待出餐，不占用原单出餐数据；全部出餐后自动并入原单 -->
+          <div class="kds-card add-card" v-if="o.is_add_card" :class="{urgent: o.timeout, urged: o.urged}">
+            <div class="kc-top">
+              <span class="table-no">{{ o.table_name }}</span>
+              <span class="t-info">
+                <span class="t">加菜 {{ o.confirmed_at }}</span><br>
+                <span class="tm" :class="{late: o.timeout}">已等 {{ o.wait_min }} 分钟
+                  <span class="urge-tag" v-if="o.urged">催单</span></span>
+              </span>
+            </div>
+            <div class="add-card-tag">🥢 加菜 · 出完自动并入原单</div>
+            <ul>
+              <li v-for="i in o.items" :key="i.id" :class="{out: i.status==='out'}">
+                <span class="li-left"><span class="add-tag">加</span>{{ i.name }}<span class="opt" v-if="optText(i.options)">{{ optText(i.options) }}</span></span>
+                <span class="li-right"><span class="q">×{{ i.qty }}</span>
+                  <button class="kc-out" :class="{done: i.status==='out'}" @click="i.status!=='out' && itemOut(o, i)">{{ i.status==='out' ? '已出 ✓' : '出餐' }}</button></span>
+              </li>
+            </ul>
+            <div class="remark" v-if="o.remark">备注：{{ o.remark }}</div>
+          </div>
+          <!-- 原单基础卡 -->
+          <div class="kds-card" v-else :class="{urgent: o.timeout, urged: o.urged}">
+            <div class="kc-top">
+              <span class="table-no">{{ o.table_name }}</span>
+              <span class="t-info">
+                <span class="t">确认 {{ o.confirmed_at }}</span><br>
+                <span class="tm" :class="{late: o.timeout}">已等 {{ o.wait_min }} 分钟
+                  <span class="urge-tag" v-if="o.urged">催单</span></span>
+              </span>
+            </div>
+            <ul>
+              <li v-for="i in o.items" :key="i.id">
+                <span class="li-left">{{ i.name }}<span class="opt" v-if="optText(i.options)">{{ optText(i.options) }}</span><span class="add-tag" v-if="i.is_add">加</span></span>
+                <span class="li-right"><span class="q">×{{ i.qty }}</span><button class="kc-out" @click="itemOut(o, i)">出餐</button></span>
+              </li>
+            </ul>
+            <div class="remark" v-if="o.remark">备注：{{ o.remark }}</div>
+            <div class="add-hint" v-if="o.has_add_card">🥢 本桌有加菜在「待出餐」</div>
+          </div>
+        </template>
+        <div class="empty" v-if="!pageNew.length">—— 无待出餐订单 ——</div>
+      </div>
+
+      <!-- 出餐中 -->
+      <div class="kds-col c-cook">
+        <div class="kds-col-head">出餐中<span class="n">{{ pageCooking.length }}</span></div>
+        <div class="kds-card" v-for="o in pageCooking" :key="o.id" :class="{urgent: o.timeout, urged: o.urged}">
+          <div class="kc-top">
+            <span class="table-no">{{ o.table_name }}</span>
+            <span class="t-info">
+              <span class="t">确认 {{ o.confirmed_at }}</span><br>
+              <span class="tm" :class="{late: o.timeout}">已等 {{ o.wait_min }} 分钟
+                <span class="urge-tag" v-if="o.urged">催单</span></span>
+            </span>
+          </div>
+          <ul>
+            <li v-for="i in o.items" :key="i.id" :class="{out: i.status==='out'}">
+              <span class="li-left">{{ i.name }}<span class="opt" v-if="optText(i.options)">{{ optText(i.options) }}</span><span class="add-tag" v-if="i.is_add">加</span></span>
+              <span class="li-right">
+                <span class="q">×{{ i.qty }}</span>
+                <button class="kc-out" :class="{done: i.status==='out'}" @click="i.status!=='out' && itemOut(o, i)">{{ i.status==='out' ? '已出 ✓' : '出餐' }}</button>
+              </span>
+            </li>
+          </ul>
+          <div class="remark" v-if="o.remark">备注：{{ o.remark }}</div>
+          <div class="add-hint" v-if="o.has_add_card">🥢 本桌有加菜在「待出餐」</div>
+        </div>
+        <div class="empty" v-if="!pageCooking.length">—— 无出餐中订单 ——</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" v-if="toast">{{ toast }}</div>
+</div>
+
+<script>
+// 页面由后端托管（http://127.0.0.1:8000/web/kds/）时用同源地址（任意端口/域名都行）；
+// 直接双击打开（file://）时默认连本机 8000 端口。
+const API_BASE = location.protocol === 'file:' ? 'http://127.0.0.1:8000' : location.origin;
+const WS_BASE = API_BASE.replace('http', 'ws');
+
+function speak(text) {
+  try {
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN'; u.rate = 1.05;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+function beep(freq) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = freq || 880; g.gain.value = 0.15;
+    o.start(); setTimeout(() => o.stop(), 350);
+  } catch (e) {}
+}
+
+const app = Vue.createApp({
+  data() {
+    return {
+      token: localStorage.getItem('kds_token') || '',
+      staff: JSON.parse(localStorage.getItem('kds_staff') || 'null'),
+      loginForm: { username: '', password: '' },
+      loginErr: '',
+      cols: { new: [], cooking: [], done: [], pending_total: 0 },
+      pendingTotal: 0,
+      timeoutMinutes: 15,
+      page: (new URLSearchParams(location.search).get('tab') === 'staple') ? 'staple' : 'dishes',
+      clock: '',
+      theme: localStorage.getItem('kds_theme') || 't-deep',
+      speech: localStorage.getItem('kds_speech') !== '0',
+      toast: '', toastTimer: null,
+      ws: null, pollTimer: null, clockTimer: null,
+      themes: [
+        { cls: 't-deep', name: '深空黑', color: '#FF6A2B' },
+        { cls: 't-green', name: '墨绿', color: '#2FBF71' },
+        { cls: 't-blue', name: '海蓝', color: '#3D6FE0' },
+        { cls: 't-brown', name: '暖棕', color: '#F59E0B' },
+      ],
+    };
+  },
+  computed: {
+    themeCls() { return this.theme; },
+    // 双页共享同一订单数据：每页只展示本页品类的明细（主食页 is_staple，餐品页其余）
+    pageNew() {
+      return this.cols.new.map((o) => this.pageOrder(o)).filter(Boolean);
+    },
+    pageCooking() {
+      return this.cols.cooking.map((o) => this.pageOrder(o)).filter(Boolean);
+    },
+  },
+  methods: {
+    pageOrder(o) {
+      const staple = this.page === 'staple';
+      const items = o.items.filter((i) => (staple ? i.is_staple : !i.is_staple));
+      if (!items.length) return null;
+      return { ...o, items };
+    },
+    say(msg) {
+      this.toast = msg;
+      clearTimeout(this.toastTimer);
+      this.toastTimer = setTimeout(() => { this.toast = ''; }, 2200);
+    },
+    optText(opts) {
+      if (!opts) return '';
+      return Object.keys(opts).map((k) => opts[k]).join('/');
+    },
+    async api(url, method, body) {
+      const res = await fetch(API_BASE + url, {
+        method: method || 'GET',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + this.token },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 401) this.logout();
+        throw new Error(data.detail || '请求失败');
+      }
+      return data;
+    },
+    async doLogin() {
+      this.loginErr = '';
+      try {
+        const data = await (await fetch(API_BASE + '/api/staff/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(this.loginForm),
+        })).json();
+        if (!data.token) { this.loginErr = data.detail || '登录失败'; return; }
+        if (!['kitchen', 'admin'].includes(data.staff.role)) { this.loginErr = '仅后厨/店长账号可进入 KDS'; return; }
+        this.token = data.token; this.staff = data.staff;
+        localStorage.setItem('kds_token', data.token);
+        localStorage.setItem('kds_staff', JSON.stringify(data.staff));
+        this.boot();
+      } catch (e) { this.loginErr = '无法连接服务器'; }
+    },
+    logout() {
+      localStorage.removeItem('kds_token');
+      this.token = ''; this.staff = null;
+      if (this.ws) this.ws.close();
+    },
+    boot() {
+      this.refresh();
+      this.pollTimer = setInterval(() => this.refresh(), 5000);
+      this.clockTimer = setInterval(() => {
+        const d = new Date();
+        const p = (n) => (n < 10 ? '0' : '') + n;
+        this.clock = p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+      }, 1000);
+      this.connectWs();
+    },
+    async refresh() {
+      if (!this.token) return;
+      try {
+        const data = await this.api('/api/kds/columns');
+        this.cols = data;
+        this.pendingTotal = data.pending_total;
+        this.timeoutMinutes = data.timeout_minutes;
+      } catch (e) {}
+    },
+    connectWs() {
+      if (!this.token) return;
+      const ws = new WebSocket(WS_BASE + '/ws/kds?token=' + this.token);
+      this.ws = ws;
+      ws.onmessage = (ev) => {
+        try {
+          const msg = JSON.parse(ev.data);
+          if (msg.type === 'urge') {
+            beep(1200);
+            if (this.speech) speak(msg.table_name + ' 桌催单');
+            this.say(msg.table_name + ' 桌催单 · 已置顶标红');
+            this.refresh();
+          } else if (msg.type === 'kds_refresh' || msg.type === 'item_out') {
+            this.refresh();
+            if (msg.type === 'item_out' && this.speech) beep(660);
+          }
+        } catch (e) {}
+      };
+      ws.onclose = () => { if (this.token) setTimeout(() => this.connectWs(), 3000); };
+    },
+    async itemOut(o, i) {
+      try {
+        await this.api('/api/kds/items/' + i.id + '/out', 'POST');
+        if (this.speech) beep(660);
+        this.refresh();
+      } catch (e) { this.say(e.message); }
+    },
+    goFull() {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen().catch(() => {});
+    },
+  },
+  watch: {
+    theme(v) { localStorage.setItem('kds_theme', v); },
+    speech(v) { localStorage.setItem('kds_speech', v ? '1' : '0'); },
+  },
+  mounted() {
+    if (this.token) this.boot();
+  },
+});
+app.mount('#app');
+</script>
+</body>
+</html>

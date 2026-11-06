@@ -1,0 +1,951 @@
+{
+ "dish": [
+  {
+   "id": 1,
+   "category_id": 1,
+   "name": "麻婆豆腐",
+   "price": 28,
+   "image": "",
+   "description": "麻辣鲜香 · 经典川味",
+   "sales": 218,
+   "option_template": "{\"\\u8471\": [\"\\u8981\\u8471\", \"\\u4e0d\\u8981\\u8471\"]}",
+   "status": "soldout",
+   "created_at": "2026-10-23 19:29:33.177975",
+   "emoji": "🌶️"
+  },
+  {
+   "id": 3,
+   "category_id": 1,
+   "name": "水煮鱼",
+   "price": 68,
+   "image": "",
+   "description": "嫩滑鱼片 · 麻辣过瘾",
+   "sales": 152,
+   "option_template": "{\"\\u8fa3\\u5ea6\": [\"\\u5fae\\u8fa3\", \"\\u4e2d\\u8fa3\", \"\\u7279\\u8fa3\"]}",
+   "status": "off",
+   "created_at": "2026-10-23 19:29:33.177975",
+   "emoji": "🐟"
+  },
+  {
+   "id": 4,
+   "category_id": 2,
+   "name": "宫保鸡丁",
+   "price": 32,
+   "image": "",
+   "description": "酸甜微辣 · 花生香脆",
+   "sales": 145,
+   "option_template": "null",
+   "status": "off",
+   "created_at": "2026-10-23 19:29:33.177975",
+   "emoji": "🍗"
+  },
+  {
+   "id": 5,
+   "category_id": 2,
+   "name": "农家小炒肉",
+   "price": 36,
+   "image": "",
+   "description": "土猪五花 · 干香下饭",
+   "sales": 118,
+   "option_template": "null",
+   "status": "off",
+   "created_at": "2026-10-23 19:29:33.177975",
+   "emoji": "🥩"
+  },
+  {
+   "id": 7,
+   "category_id": 3,
+   "name": "蒜泥白肉",
+   "price": 22,
+   "image": "",
+   "description": "蒜香浓郁 · 肥瘦相间",
+   "sales": 76,
+   "option_template": "null",
+   "status": "off",
+   "created_at": "2026-10-23 19:29:33.177975",
+   "emoji": "🍖"
+  },
+  {
+   "id": 8,
+   "category_id": 3,
+   "name": "拍黄瓜",
+   "price": 12,
+   "image": "",
+   "description": "爽脆解腻 · 现拍现拌",
+   "sales": 189,
+   "option_template": "{\"\\u849c\": [\"\\u52a0\\u849c\", \"\\u4e0d\\u52a0\\u849c\"]}",
+   "status": "off",
+   "created_at": "2026-10-23 19:29:33.177975",
+   "emoji": "🥒"
+  },
+  {
+   "id": 9,
+   "category_id": 4,
+   "name": "五常米饭",
+   "price": 2,
+   "image": "",
+   "description": "东北五常 · 现蒸",
+   "sales": 520,
+   "option_template": "null",
+   "status": "off",
+   "created_at": "2026-10-23 19:29:33.177975",
+   "emoji": "🍚"
+  },
+  {
+   "id": 10,
+   "category_id": 4,
+   "name": "手工水饺",
+   "price": 16,
+   "image": "",
+   "description": "现包现煮 · 白菜猪肉馅",
+   "sales": 64,
+   "option_template": "null",
+   "status": "off",
+   "created_at": "2026-10-23 19:29:33.177975",
+   "emoji": "🥟"
+  },
+  {
+   "id": 11,
+   "category_id": 5,
+   "name": "番茄蛋汤",
+   "price": 16,
+   "image": "",
+   "description": "酸甜开胃 · 蛋花嫩滑",
+   "sales": 88,
+   "option_template": "null",
+   "status": "off",
+   "created_at": "2026-10-23 19:29:33.177975",
+   "emoji": "🍅"
+  },
+  {
+   "id": 12,
+   "category_id": 5,
+   "name": "酸菜粉丝汤",
+   "price": 18,
+   "image": "",
+   "description": "酸辣爽口 · 老坛酸菜",
+   "sales": 57,
+   "option_template": "null",
+   "status": "off",
+   "created_at": "2026-10-23 19:29:33.177975",
+   "emoji": "🍲"
+  },
+  {
+   "id": 13,
+   "category_id": 6,
+   "name": "冰镇酸梅汤",
+   "price": 8,
+   "image": "",
+   "description": "古法熬制 · 冰爽解辣",
+   "sales": 210,
+   "option_template": "null",
+   "status": "off",
+   "created_at": "2026-10-23 19:29:33.180990",
+   "emoji": "🥤"
+  },
+  {
+   "id": 14,
+   "category_id": 6,
+   "name": "王老吉",
+   "price": 6,
+   "image": "",
+   "description": "罐装 · 冰镇",
+   "sales": 96,
+   "option_template": "null",
+   "status": "off",
+   "created_at": "2026-10-23 19:29:33.180990",
+   "emoji": "🧃"
+  }
+ ],
+ "dish_ingredient": [
+  {
+   "id": 1,
+   "dish_id": 1,
+   "ingredient_id": 4,
+   "quantity": 300,
+   "loss_rate": 3,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 2,
+   "dish_id": 1,
+   "ingredient_id": 1,
+   "quantity": 50,
+   "loss_rate": 2,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 3,
+   "dish_id": 1,
+   "ingredient_id": 13,
+   "quantity": 10,
+   "loss_rate": 1,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 4,
+   "dish_id": 1,
+   "ingredient_id": 14,
+   "quantity": 5,
+   "loss_rate": 1,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 5,
+   "dish_id": 1,
+   "ingredient_id": 15,
+   "quantity": 20,
+   "loss_rate": 1,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 10,
+   "dish_id": 3,
+   "ingredient_id": 3,
+   "quantity": 500,
+   "loss_rate": 8,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 11,
+   "dish_id": 3,
+   "ingredient_id": 13,
+   "quantity": 20,
+   "loss_rate": 2,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 12,
+   "dish_id": 3,
+   "ingredient_id": 14,
+   "quantity": 10,
+   "loss_rate": 1,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 13,
+   "dish_id": 3,
+   "ingredient_id": 15,
+   "quantity": 30,
+   "loss_rate": 1,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 14,
+   "dish_id": 4,
+   "ingredient_id": 2,
+   "quantity": 200,
+   "loss_rate": 5,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 15,
+   "dish_id": 4,
+   "ingredient_id": 12,
+   "quantity": 30,
+   "loss_rate": 2,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 16,
+   "dish_id": 4,
+   "ingredient_id": 13,
+   "quantity": 8,
+   "loss_rate": 1,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 17,
+   "dish_id": 4,
+   "ingredient_id": 15,
+   "quantity": 15,
+   "loss_rate": 1,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 18,
+   "dish_id": 5,
+   "ingredient_id": 1,
+   "quantity": 220,
+   "loss_rate": 3,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 19,
+   "dish_id": 5,
+   "ingredient_id": 13,
+   "quantity": 8,
+   "loss_rate": 1,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 20,
+   "dish_id": 5,
+   "ingredient_id": 18,
+   "quantity": 40,
+   "loss_rate": 4,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 21,
+   "dish_id": 5,
+   "ingredient_id": 15,
+   "quantity": 15,
+   "loss_rate": 1,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 25,
+   "dish_id": 7,
+   "ingredient_id": 1,
+   "quantity": 200,
+   "loss_rate": 4,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 26,
+   "dish_id": 8,
+   "ingredient_id": 9,
+   "quantity": 300,
+   "loss_rate": 5,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 27,
+   "dish_id": 9,
+   "ingredient_id": 5,
+   "quantity": 150,
+   "loss_rate": 1,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 28,
+   "dish_id": 10,
+   "ingredient_id": 6,
+   "quantity": 100,
+   "loss_rate": 2,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 29,
+   "dish_id": 10,
+   "ingredient_id": 1,
+   "quantity": 80,
+   "loss_rate": 3,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 30,
+   "dish_id": 10,
+   "ingredient_id": 10,
+   "quantity": 60,
+   "loss_rate": 5,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 31,
+   "dish_id": 11,
+   "ingredient_id": 8,
+   "quantity": 200,
+   "loss_rate": 4,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 32,
+   "dish_id": 11,
+   "ingredient_id": 7,
+   "quantity": 1,
+   "loss_rate": 2,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 33,
+   "dish_id": 12,
+   "ingredient_id": 10,
+   "quantity": 150,
+   "loss_rate": 3,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 34,
+   "dish_id": 12,
+   "ingredient_id": 11,
+   "quantity": 50,
+   "loss_rate": 2,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 35,
+   "dish_id": 13,
+   "ingredient_id": 16,
+   "quantity": 30,
+   "loss_rate": 2,
+   "created_at": "2026-10-23 19:29:33.183849"
+  },
+  {
+   "id": 36,
+   "dish_id": 14,
+   "ingredient_id": 17,
+   "quantity": 1,
+   "loss_rate": 0,
+   "created_at": "2026-10-23 19:29:33.183849"
+  }
+ ],
+ "order_item_dish_ids": [
+  {
+   "id": 1,
+   "order_id": 1,
+   "dish_id": 1
+  },
+  {
+   "id": 2,
+   "order_id": 1,
+   "dish_id": 3
+  },
+  {
+   "id": 3,
+   "order_id": 1,
+   "dish_id": 9
+  },
+  {
+   "id": 5,
+   "order_id": 2,
+   "dish_id": 4
+  },
+  {
+   "id": 6,
+   "order_id": 3,
+   "dish_id": 5
+  },
+  {
+   "id": 7,
+   "order_id": 4,
+   "dish_id": 1
+  },
+  {
+   "id": 8,
+   "order_id": 4,
+   "dish_id": 3
+  },
+  {
+   "id": 9,
+   "order_id": 4,
+   "dish_id": 9
+  },
+  {
+   "id": 11,
+   "order_id": 5,
+   "dish_id": 7
+  },
+  {
+   "id": 12,
+   "order_id": 5,
+   "dish_id": 12
+  },
+  {
+   "id": 13,
+   "order_id": 5,
+   "dish_id": 13
+  },
+  {
+   "id": 14,
+   "order_id": 6,
+   "dish_id": 1
+  },
+  {
+   "id": 16,
+   "order_id": 6,
+   "dish_id": 4
+  },
+  {
+   "id": 17,
+   "order_id": 6,
+   "dish_id": 13
+  },
+  {
+   "id": 18,
+   "order_id": 7,
+   "dish_id": 1
+  },
+  {
+   "id": 21,
+   "order_id": 8,
+   "dish_id": 12
+  },
+  {
+   "id": 22,
+   "order_id": 8,
+   "dish_id": 14
+  },
+  {
+   "id": 23,
+   "order_id": 9,
+   "dish_id": 4
+  },
+  {
+   "id": 25,
+   "order_id": 9,
+   "dish_id": 13
+  },
+  {
+   "id": 26,
+   "order_id": 9,
+   "dish_id": 9
+  },
+  {
+   "id": 28,
+   "order_id": 9,
+   "dish_id": 10
+  },
+  {
+   "id": 29,
+   "order_id": 9,
+   "dish_id": 4
+  },
+  {
+   "id": 30,
+   "order_id": 9,
+   "dish_id": 7
+  },
+  {
+   "id": 31,
+   "order_id": 9,
+   "dish_id": 9
+  },
+  {
+   "id": 32,
+   "order_id": 10,
+   "dish_id": 3
+  },
+  {
+   "id": 34,
+   "order_id": 10,
+   "dish_id": 9
+  },
+  {
+   "id": 35,
+   "order_id": 11,
+   "dish_id": 1
+  },
+  {
+   "id": 36,
+   "order_id": 11,
+   "dish_id": 7
+  },
+  {
+   "id": 37,
+   "order_id": 11,
+   "dish_id": 11
+  },
+  {
+   "id": 39,
+   "order_id": 12,
+   "dish_id": 4
+  },
+  {
+   "id": 40,
+   "order_id": 12,
+   "dish_id": 9
+  },
+  {
+   "id": 41,
+   "order_id": 13,
+   "dish_id": 3
+  },
+  {
+   "id": 42,
+   "order_id": 13,
+   "dish_id": 3
+  },
+  {
+   "id": 43,
+   "order_id": 14,
+   "dish_id": 1
+  },
+  {
+   "id": 44,
+   "order_id": 14,
+   "dish_id": 5
+  },
+  {
+   "id": 45,
+   "order_id": 14,
+   "dish_id": 13
+  },
+  {
+   "id": 46,
+   "order_id": 14,
+   "dish_id": 9
+  },
+  {
+   "id": 47,
+   "order_id": 14,
+   "dish_id": 11
+  },
+  {
+   "id": 49,
+   "order_id": 15,
+   "dish_id": 3
+  },
+  {
+   "id": 50,
+   "order_id": 15,
+   "dish_id": 4
+  },
+  {
+   "id": 51,
+   "order_id": 15,
+   "dish_id": 5
+  },
+  {
+   "id": 52,
+   "order_id": 15,
+   "dish_id": 7
+  },
+  {
+   "id": 53,
+   "order_id": 15,
+   "dish_id": 8
+  },
+  {
+   "id": 54,
+   "order_id": 15,
+   "dish_id": 9
+  },
+  {
+   "id": 55,
+   "order_id": 15,
+   "dish_id": 10
+  },
+  {
+   "id": 56,
+   "order_id": 16,
+   "dish_id": 1
+  },
+  {
+   "id": 58,
+   "order_id": 16,
+   "dish_id": 9
+  },
+  {
+   "id": 59,
+   "order_id": 16,
+   "dish_id": 10
+  },
+  {
+   "id": 60,
+   "order_id": 16,
+   "dish_id": 11
+  },
+  {
+   "id": 61,
+   "order_id": 16,
+   "dish_id": 12
+  },
+  {
+   "id": 63,
+   "order_id": 17,
+   "dish_id": 4
+  },
+  {
+   "id": 64,
+   "order_id": 18,
+   "dish_id": 3
+  },
+  {
+   "id": 65,
+   "order_id": 18,
+   "dish_id": 4
+  },
+  {
+   "id": 67,
+   "order_id": 19,
+   "dish_id": 4
+  },
+  {
+   "id": 69,
+   "order_id": 20,
+   "dish_id": 3
+  },
+  {
+   "id": 70,
+   "order_id": 20,
+   "dish_id": 4
+  },
+  {
+   "id": 71,
+   "order_id": 20,
+   "dish_id": 5
+  },
+  {
+   "id": 73,
+   "order_id": 21,
+   "dish_id": 7
+  },
+  {
+   "id": 74,
+   "order_id": 21,
+   "dish_id": 8
+  },
+  {
+   "id": 75,
+   "order_id": 21,
+   "dish_id": 9
+  },
+  {
+   "id": 76,
+   "order_id": 21,
+   "dish_id": 10
+  },
+  {
+   "id": 78,
+   "order_id": 22,
+   "dish_id": 3
+  },
+  {
+   "id": 80,
+   "order_id": 23,
+   "dish_id": 3
+  },
+  {
+   "id": 81,
+   "order_id": 23,
+   "dish_id": 4
+  },
+  {
+   "id": 82,
+   "order_id": 23,
+   "dish_id": 5
+  },
+  {
+   "id": 84,
+   "order_id": 23,
+   "dish_id": 7
+  },
+  {
+   "id": 85,
+   "order_id": 24,
+   "dish_id": 5
+  },
+  {
+   "id": 86,
+   "order_id": 24,
+   "dish_id": 7
+  },
+  {
+   "id": 87,
+   "order_id": 25,
+   "dish_id": 14
+  },
+  {
+   "id": 88,
+   "order_id": 26,
+   "dish_id": 3
+  },
+  {
+   "id": 89,
+   "order_id": 26,
+   "dish_id": 5
+  },
+  {
+   "id": 90,
+   "order_id": 27,
+   "dish_id": 5
+  },
+  {
+   "id": 91,
+   "order_id": 28,
+   "dish_id": 10
+  },
+  {
+   "id": 92,
+   "order_id": 28,
+   "dish_id": 8
+  },
+  {
+   "id": 93,
+   "order_id": 28,
+   "dish_id": 3
+  },
+  {
+   "id": 95,
+   "order_id": 29,
+   "dish_id": 9
+  },
+  {
+   "id": 96,
+   "order_id": 29,
+   "dish_id": 10
+  },
+  {
+   "id": 98,
+   "order_id": 30,
+   "dish_id": 4
+  },
+  {
+   "id": 99,
+   "order_id": 30,
+   "dish_id": 9
+  },
+  {
+   "id": 100,
+   "order_id": 30,
+   "dish_id": 4
+  },
+  {
+   "id": 101,
+   "order_id": 31,
+   "dish_id": 3
+  },
+  {
+   "id": 102,
+   "order_id": 31,
+   "dish_id": 4
+  },
+  {
+   "id": 103,
+   "order_id": 31,
+   "dish_id": 9
+  },
+  {
+   "id": 104,
+   "order_id": 31,
+   "dish_id": 10
+  },
+  {
+   "id": 105,
+   "order_id": 31,
+   "dish_id": 9
+  },
+  {
+   "id": 106,
+   "order_id": 31,
+   "dish_id": 7
+  },
+  {
+   "id": 107,
+   "order_id": 31,
+   "dish_id": 12
+  },
+  {
+   "id": 109,
+   "order_id": 32,
+   "dish_id": 3
+  },
+  {
+   "id": 110,
+   "order_id": 32,
+   "dish_id": 7
+  },
+  {
+   "id": 111,
+   "order_id": 32,
+   "dish_id": 8
+  },
+  {
+   "id": 112,
+   "order_id": 32,
+   "dish_id": 9
+  },
+  {
+   "id": 113,
+   "order_id": 33,
+   "dish_id": 3
+  },
+  {
+   "id": 114,
+   "order_id": 33,
+   "dish_id": 5
+  },
+  {
+   "id": 115,
+   "order_id": 33,
+   "dish_id": 10
+  },
+  {
+   "id": 116,
+   "order_id": 34,
+   "dish_id": 3
+  },
+  {
+   "id": 117,
+   "order_id": 34,
+   "dish_id": 5
+  },
+  {
+   "id": 120,
+   "order_id": 35,
+   "dish_id": 3
+  },
+  {
+   "id": 121,
+   "order_id": 35,
+   "dish_id": 4
+  },
+  {
+   "id": 123,
+   "order_id": 36,
+   "dish_id": 5
+  },
+  {
+   "id": 124,
+   "order_id": 36,
+   "dish_id": 8
+  },
+  {
+   "id": 125,
+   "order_id": 36,
+   "dish_id": 13
+  },
+  {
+   "id": 127,
+   "order_id": 37,
+   "dish_id": 7
+  },
+  {
+   "id": 128,
+   "order_id": 37,
+   "dish_id": 12
+  },
+  {
+   "id": 129,
+   "order_id": 38,
+   "dish_id": 4
+  },
+  {
+   "id": 130,
+   "order_id": 38,
+   "dish_id": 5
+  },
+  {
+   "id": 131,
+   "order_id": 38,
+   "dish_id": 4
+  },
+  {
+   "id": 132,
+   "order_id": 38,
+   "dish_id": 9
+  },
+  {
+   "id": 133,
+   "order_id": 38,
+   "dish_id": 9
+  },
+  {
+   "id": 134,
+   "order_id": 39,
+   "dish_id": 3
+  },
+  {
+   "id": 135,
+   "order_id": 39,
+   "dish_id": 5
+  },
+  {
+   "id": 137,
+   "order_id": 40,
+   "dish_id": 7
+  }
+ ]
+}

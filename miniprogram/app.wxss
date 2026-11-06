@@ -1,0 +1,49 @@
+/* 公共样式 */
+page {
+  background: #F6F4F1;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+  color: #1F2329;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(31, 35, 41, 0.04);
+}
+
+.price {
+  color: #E85518;
+  font-weight: 800;
+}
+
+.price small {
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #FF6A2B, #FF8A4C);
+  color: #fff;
+  border-radius: 999rpx;
+  font-weight: 700;
+  border: none;
+}
+
+.btn-primary::after { border: none; }
+
+.btn-plain {
+  background: #fff;
+  color: #E85518;
+  border: 2rpx solid #FF6A2B;
+  border-radius: 999rpx;
+  font-weight: 600;
+}
+
+.btn-plain::after { border: none; }
+
+.empty-tip {
+  text-align: center;
+  color: #9BA3B2;
+  font-size: 26rpx;
+  padding: 80rpx 0;
+}

@@ -1,0 +1,22 @@
+.page { min-height:100vh; background:linear-gradient(180deg,#FFF3EA 0%,#F6F4F1 320rpx); padding:0 40rpx 60rpx; }
+
+.hero { text-align:center; padding:80rpx 0 40rpx; }
+.logo { font-size:96rpx; }
+.shop-name { font-size:44rpx; font-weight:800; color:#1F2329; margin-top:10rpx; }
+.slogan { font-size:26rpx; color:#9BA3B2; margin-top:8rpx; }
+
+.scan-zone { display:flex; justify-content:center; }
+.scan-btn { width:100%; max-width:620rpx; background:#fff; border:none; border-radius:28rpx; padding:56rpx 0 48rpx; box-shadow:0 16rpx 48rpx rgba(232,85,24,.14); }
+.scan-btn::after { border:none; }
+.scan-ico { font-size:76rpx; line-height:1; }
+.scan-title { font-size:36rpx; font-weight:800; color:#E85518; margin-top:18rpx; }
+.scan-sub { font-size:24rpx; color:#9BA3B2; margin-top:8rpx; }
+
+.dev-zone { margin-top:60rpx; }
+.dev-title { font-size:26rpx; color:#8A94A6; text-align:center; }
+.dev-sub { font-size:24rpx; color:#C0C6D0; text-align:center; margin-top:12rpx; }
+.tbl-grid { display:flex; flex-wrap:wrap; gap:20rpx; margin-top:24rpx; justify-content:center; }
+.tbl { width:200rpx; background:#fff; border-radius:20rpx; padding:26rpx 0; text-align:center; box-shadow:0 4rpx 16rpx rgba(31,35,41,.05); }
+.tbl:active { transform:scale(.96); }
+.tbl-no { font-size:34rpx; font-weight:800; color:#2563EB; }
+.tbl-area { font-size:22rpx; color:#9BA3B2; margin-top:6rpx; }

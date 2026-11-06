@@ -1,0 +1,23 @@
+[Unit]
+Description=Restaurant FastAPI backend (port 8001)
+After=network.target mysqld.service redis.service
+Wants=mysqld.service redis.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/restaurant/backend
+ExecStart=/opt/restaurant/backend/.venv/bin/python run.py 8001 127.0.0.1
+Restart=always
+RestartSec=3
+
+# 生产环境变量（密码与密钥见 deploy/secrets.env，勿提交到 git）
+Environment=DATABASE_URL=mysql+pymysql://restaurant:__MYSQL_PASSWORD__@127.0.0.1:3306/restaurant?charset=utf8mb4
+Environment=REDIS_URL=redis://127.0.0.1:6379/0
+Environment=JWT_SECRET=__JWT_SECRET__
+Environment=WX_LOGIN_MOCK=1
+Environment=WEATHER_CITY=山西运城盐湖区
+Environment=WEATHER_LAT=35.03
+Environment=WEATHER_LON=110.99
+
+[Install]
+WantedBy=multi-user.target

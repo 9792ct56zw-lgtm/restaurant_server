@@ -1,0 +1,65 @@
+<view class="page">
+  <view class="table-bar" wx:if="{{table}}">
+    <text class="t-name">{{table.name}}</text>
+    <text class="t-sub">桌 · {{table.area}} · 收银台结账</text>
+  </view>
+
+  <view class="card list-card" wx:if="{{items.length}}">
+    <view class="card-title">
+      <text>已选菜品</text>
+      <text class="clear" bindtap="onClear">清空</text>
+    </view>
+    <view wx:for="{{items}}" wx:key="key" class="item">
+      <view class="i-info">
+        <view class="i-name">{{item.name}}</view>
+        <view class="i-opt" wx:if="{{item.optionsText}}">{{item.optionsText}}</view>
+        <view class="i-price price"><text class="rmb">¥</text>{{item.price}}</view>
+      </view>
+      <view class="stepper">
+        <view class="step-btn minus" data-id="{{item.dishId}}" data-options="{{item.options}}" catchtap="onSub">−</view>
+        <text class="qty">{{item.qty}}</text>
+        <view class="step-btn plus" data-id="{{item.dishId}}" data-options="{{item.options}}" catchtap="onPlus">＋</view>
+      </view>
+    </view>
+  </view>
+  <view class="empty-tip" wx:else>购物车是空的，快去选菜吧～</view>
+
+  <view class="card">
+    <view class="card-title"><text>订单备注</text></view>
+    <input class="remark-input" placeholder="口味、忌口等要求（如：不要香菜）"
+      value="{{remark}}" bindinput="onRemark" maxlength="60" />
+  </view>
+
+  <view class="card">
+    <view class="card-title"><text>用餐人数</text></view>
+    <view class="people-row">
+      <view wx:for="{{[1,2,3,4,5,6,7,8]}}" wx:key="*this"
+        class="people-chip {{people === item ? 'sel' : ''}}"
+        data-n="{{item}}" bindtap="pickPeople">{{item}}人</view>
+    </view>
+    <view class="fee-row">
+      <text>餐具费（每人 ¥1，随人数自动计）</text>
+      <text class="fee-val">¥{{people}}.00</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title"><text>餐具份数</text></view>
+    <view class="utensil-row">
+      <view class="stepper">
+        <view class="step-btn minus" bindtap="utensilSub">−</view>
+        <text class="qty">{{utensils}}</text>
+        <view class="step-btn plus" bindtap="utensilPlus">＋</view>
+      </view>
+      <text class="hint">默认跟随人数，可增减</text>
+    </view>
+  </view>
+
+  <view class="submit-bar">
+    <view class="sb-total">
+      <text class="sb-label">共 {{count}} 件 · 菜品 ¥{{dishTotal}} + 餐具费 ¥{{people}}</text>
+      <text class="sb-price">¥{{total}}</text>
+    </view>
+    <button class="btn-primary sb-btn" bindtap="submit">提交订单</button>
+  </view>
+</view>

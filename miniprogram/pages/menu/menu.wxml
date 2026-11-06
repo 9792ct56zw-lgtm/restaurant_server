@@ -1,0 +1,106 @@
+<view class="page">
+  <!-- 门店头部 -->
+  <view class="shop-head" wx:if="{{shop}}">
+    <view class="shop-name">{{shop.name}}</view>
+    <view class="shop-notice" wx:if="{{shop.notice}}">{{shop.notice}}</view>
+    <view class="table-chip" wx:if="{{table}}">{{table.name}} 桌 · {{table.area}}</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty-tip">菜单加载中…</view>
+
+  <view class="menu-wrap" wx:else>
+    <!-- 左侧分类 -->
+    <scroll-view class="cat-rail" scroll-y scroll-into-view="{{catScrollInto}}" scroll-with-animation>
+      <view
+        wx:for="{{categories}}" wx:key="id"
+        id="cat-{{item.id}}"
+        class="cat-item {{activeCat === item.id ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="tapCategory"
+      >{{item.name}}</view>
+    </scroll-view>
+
+    <!-- 右侧菜品 -->
+    <scroll-view class="dish-list" scroll-y scroll-into-view="{{dishScrollInto}}" scroll-with-animation
+      bindscroll="onDishScroll" bindscrolltoupper="onDishScrollEnd" bindscrollend="onDishScrollEnd">
+      <view wx:for="{{categories}}" wx:key="id" id="sec-{{item.id}}" class="dish-sec">
+        <view class="sec-title">{{item.name}}</view>
+        <view wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="id" class="dish-card">
+          <view class="thumb" style="background:{{dish.grad}}">
+            <image wx:if="{{dish.image}}" src="{{dish.image}}" mode="aspectFill" class="thumb-img" bindload="onImgLoad"></image>
+            <text wx:elif="{{dish.emoji}}" class="thumb-emoji">{{dish.emoji}}</text>
+            <text wx:else class="thumb-char">{{dish.first}}</text>
+          </view>
+          <view class="info">
+            <view class="name-row">
+              <text class="name">{{dish.name}}</text>
+              <text class="badge" wx:if="{{dish.badge}}">{{dish.badge}}</text>
+            </view>
+            <view class="desc">{{dish.description}}</view>
+            <view class="sales">月售 {{dish.sales}}</view>
+            <view class="bottom">
+              <view class="price"><text class="rmb">¥</text>{{dish.price}}</view>
+              <view class="stepper">
+                <view class="step-btn minus" wx:if="{{dish.qty > 0}}" data-dish="{{dish}}" catchtap="onSub">−</view>
+                <text class="qty" wx:if="{{dish.qty > 0}}">{{dish.qty}}</text>
+                <view class="step-btn plus" data-dish="{{dish}}" catchtap="onAdd">＋</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="list-tail">— 已经到底啦 —</view>
+    </scroll-view>
+  </view>
+
+  <!-- 底部购物车栏 -->
+  <view class="cartbar" wx:if="{{!loading}}">
+    <view class="cart-ico {{cartCount > 0 ? 'has' : ''}}" bindtap="goCart">
+      <text class="cart-glyph">🛒</text>
+      <view class="cnt" wx:if="{{cartCount > 0}}">{{cartCount}}</view>
+    </view>
+    <view class="cart-total">
+      <text class="ct-label">{{addMode ? '补单加菜' : '合计'}}</text>
+      <text class="ct-price" wx:if="{{cartTotal !== '0.00'}}">¥{{cartTotal}}</text>
+    </view>
+    <button class="go-btn" bindtap="goCart">{{addMode ? '提交加菜' : '去下单'}}</button>
+  </view>
+
+  <!-- 规格弹层 -->
+  <view class="mask" wx:if="{{specShow}}" bindtap="closeSpec"></view>
+  <view class="spec-sheet {{specShow ? 'show' : ''}}" wx:if="{{specShow}}">
+    <view class="spec-head">
+      <view class="spec-thumb" style="background:{{spec.grad}}">
+        <text wx:if="{{spec.emoji}}" class="thumb-emoji">{{spec.emoji}}</text>
+        <text wx:else>{{spec.name[0]}}</text>
+      </view>
+      <view class="spec-info">
+        <view class="spec-name">{{spec.name}}</view>
+        <view class="price"><text class="rmb">¥</text>{{spec.price}}</view>
+      </view>
+      <view class="spec-close" bindtap="closeSpec">×</view>
+    </view>
+    <scroll-view scroll-y class="spec-body">
+      <view wx:for="{{specGroups}}" wx:key="label" class="spec-group">
+        <view class="spec-label">{{item.label}}</view>
+        <view class="chip-row">
+          <view
+            wx:for="{{item.values}}" wx:for-item="v" wx:key="label"
+            class="chip {{v.selected ? 'sel' : ''}}"
+            data-label="{{item.label}}" data-value="{{v.label}}"
+            bindtap="tapSpecValue"
+          >{{v.label}}</view>
+        </view>
+      </view>
+      <view class="spec-qty-row">
+        <text>数量</text>
+        <view class="stepper">
+          <view class="step-btn minus" bindtap="specSub">−</view>
+          <text class="qty">{{specQty}}</text>
+          <view class="step-btn plus" bindtap="specPlus">＋</view>
+        </view>
+      </view>
+    </scroll-view>
+    <button class="spec-confirm" bindtap="confirmSpec">加入购物车 · ¥{{spec.price * specQty}}</button>
+  </view>
+</view>

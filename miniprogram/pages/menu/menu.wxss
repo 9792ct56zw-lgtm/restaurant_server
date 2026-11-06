@@ -1,0 +1,367 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* 门店头部 */
+.shop-head {
+  background: linear-gradient(135deg, #FF6A2B, #FF8A4C);
+  color: #fff;
+  padding: 24rpx 28rpx 26rpx;
+}
+.shop-name {
+  font-size: 34rpx;
+  font-weight: 800;
+}
+.shop-notice {
+  font-size: 22rpx;
+  opacity: 0.9;
+  margin-top: 6rpx;
+}
+.table-chip {
+  display: inline-block;
+  margin-top: 14rpx;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999rpx;
+  padding: 6rpx 20rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+/* 双栏菜单 */
+.menu-wrap {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+.cat-rail {
+  width: 168rpx;
+  flex: none;
+  background: #F0EDE9;
+  height: 100%;
+}
+.cat-item {
+  padding: 30rpx 12rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #5A6370;
+  position: relative;
+}
+.cat-item.active {
+  background: #fff;
+  color: #E85518;
+  font-weight: 800;
+}
+.cat-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 22rpx;
+  bottom: 22rpx;
+  width: 6rpx;
+  background: #FF6A2B;
+  border-radius: 0 6rpx 6rpx 0;
+}
+
+.dish-list {
+  flex: 1;
+  height: 100%;
+  background: #fff;
+}
+.dish-sec {
+  padding: 0 24rpx;
+}
+.sec-title {
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #5A6370;
+  padding: 24rpx 4rpx 12rpx;
+}
+.dish-card {
+  display: flex;
+  padding: 20rpx 4rpx;
+  border-bottom: 2rpx solid #F4F2EF;
+}
+.thumb {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 16rpx;
+  flex: none;
+  color: #fff;
+  font-size: 44rpx;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.thumb-img { width: 140rpx; height: 140rpx; }
+.thumb-emoji { font-size: 60rpx; line-height: 1; }
+.thumb-char { font-size: 44rpx; }
+.info {
+  flex: 1;
+  margin-left: 20rpx;
+  display: flex;
+  flex-direction: column;
+}
+.name-row {
+  display: flex;
+  align-items: center;
+}
+.name {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+.badge {
+  margin-left: 10rpx;
+  font-size: 18rpx;
+  font-weight: 700;
+  color: #E85518;
+  background: #FFF1E8;
+  border-radius: 6rpx;
+  padding: 2rpx 10rpx;
+}
+.desc {
+  font-size: 22rpx;
+  color: #9BA3B2;
+  margin-top: 6rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sales {
+  font-size: 20rpx;
+  color: #B6BDC7;
+  margin-top: 4rpx;
+}
+.bottom {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.price {
+  color: #E85518;
+  font-size: 32rpx;
+  font-weight: 800;
+}
+.rmb {
+  font-size: 20rpx;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+}
+.step-btn {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+.step-btn.plus {
+  background: #FF6A2B;
+  color: #fff;
+  box-shadow: 0 6rpx 14rpx rgba(255, 106, 43, 0.35);
+}
+.step-btn.minus {
+  border: 2rpx solid #FF6A2B;
+  color: #E85518;
+  background: #fff;
+}
+.qty {
+  min-width: 48rpx;
+  text-align: center;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.list-tail {
+  text-align: center;
+  color: #C4CAD3;
+  font-size: 22rpx;
+  padding: 30rpx 0 160rpx;
+}
+
+/* 购物车栏 */
+.cartbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #1F2329;
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+}
+.cart-ico {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: #3A4048;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex: none;
+}
+.cart-ico.has {
+  background: #FF6A2B;
+}
+.cart-glyph {
+  font-size: 40rpx;
+}
+.cart-ico .cnt {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  background: #fff;
+  color: #E85518;
+  font-size: 20rpx;
+  font-weight: 800;
+  border-radius: 999rpx;
+  min-width: 34rpx;
+  height: 34rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8rpx;
+}
+.cart-total {
+  flex: 1;
+  margin-left: 20rpx;
+  display: flex;
+  align-items: baseline;
+}
+.ct-label {
+  color: #9BA3B2;
+  font-size: 22rpx;
+  margin-right: 10rpx;
+}
+.ct-price {
+  color: #FF8A4C;
+  font-size: 34rpx;
+  font-weight: 800;
+}
+.go-btn {
+  background: linear-gradient(90deg, #FF6A2B, #FF8A4C);
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 700;
+  border-radius: 999rpx;
+  padding: 0 48rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  border: none;
+  flex: none;
+}
+.go-btn::after { border: none; }
+
+/* 规格弹层 */
+.mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 90;
+}
+.spec-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-radius: 32rpx 32rpx 0 0;
+  z-index: 91;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+}
+.spec-head {
+  display: flex;
+  align-items: center;
+  padding: 28rpx;
+  position: relative;
+}
+.spec-thumb {
+  width: 110rpx;
+  height: 110rpx;
+  border-radius: 16rpx;
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.spec-info {
+  margin-left: 20rpx;
+}
+.spec-name {
+  font-size: 30rpx;
+  font-weight: 800;
+}
+.spec-close {
+  position: absolute;
+  right: 28rpx;
+  top: 20rpx;
+  font-size: 44rpx;
+  color: #9BA3B2;
+  padding: 0 10rpx;
+}
+.spec-body {
+  max-height: 44vh;
+  padding: 0 28rpx;
+}
+.spec-group {
+  margin-bottom: 26rpx;
+}
+.spec-label {
+  font-size: 24rpx;
+  color: #5A6370;
+  font-weight: 700;
+  margin-bottom: 14rpx;
+}
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.chip {
+  padding: 12rpx 30rpx;
+  border-radius: 999rpx;
+  background: #F4F2EF;
+  font-size: 26rpx;
+  color: #1F2329;
+  border: 2rpx solid transparent;
+}
+.chip.sel {
+  border-color: #FF6A2B;
+  background: #FFF1E8;
+  color: #E85518;
+  font-weight: 700;
+}
+.spec-qty-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 26rpx;
+  font-weight: 700;
+  margin: 10rpx 0 20rpx;
+}
+.spec-confirm {
+  margin: 0 28rpx;
+  background: linear-gradient(90deg, #FF6A2B, #FF8A4C);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 999rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 30rpx;
+  border: none;
+}
+.spec-confirm::after { border: none; }

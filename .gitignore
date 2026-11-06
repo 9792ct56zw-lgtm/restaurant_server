@@ -1,0 +1,25 @@
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# 数据库文件（本地 SQLite 数据不进仓库，服务器用 MySQL）
+backend/*.db
+backend/*.db-shm
+backend/*.db-wal
+
+# 密钥与部署机密（只在本地，绝不上传）
+deploy/secrets.env
+
+# 运行日志（backend/logs/app.log 滚动文件，不入库）
+backend/logs/
+
+# 临时与日志
+*.log
+smoke_run.log
+seed_check.db*
+
+# 系统文件
+Thumbs.db
+.DS_Store
